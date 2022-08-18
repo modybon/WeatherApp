@@ -22,7 +22,7 @@
         <entry key="app/src/main/res/drawable/tab_indicator_selected.xml" value="0.267" />
         <entry key="app/src/main/res/drawable/tab_selector.xml" value="0.267" />
         <entry key="app/src/main/res/drawable/wind.xml" value="0.22" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.18546752929687493" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_search_page.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_weather_page.xml" value="0.21802978515625002" />
         <entry key="app/src/main/res/layout/mini_wheather_info_layout.xml" value="0.1377952755905512" />

@@ -26,7 +26,6 @@ object SharedPrefrencesManager {
         with(sharedPreferences){
             if (this!!.contains(key)){
                 val l = sharedPreferences!!.getStringSet(key,null)!!.toSet()
-
                 return sharedPreferences!!.getStringSet(key,null)!!.toSet()
             }
             return setOf()

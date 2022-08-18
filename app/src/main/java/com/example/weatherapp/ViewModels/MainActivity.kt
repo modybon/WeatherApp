@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity(){
         this.binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         intentExtras.getParcelableArrayList<Parcelable>("CitiesList").toString()
+        var itemPosition = intentExtras.getInt("ItemSelectedPosition")
         //list.getBundleExtra("CitiesList")
         //Log.e(TAG, "TEST 1 onCreate: ${data.getParcelableArrayList<Parcelable>("CitiesList").toString()}", )
         //var l = intentExtras as JSONObject
@@ -51,7 +52,8 @@ class MainActivity : AppCompatActivity(){
         TabLayoutMediator(this.binding.tabLayout,this.binding.viewpager){ tab, position ->
             // tab is the for the tabs below
             // positions is referring to the position of the view pager
-            Log.e(TAG, "Main onCreate: TAB", )
+            Log.e(TAG, "Main onCreate: TAB $position", )
+            this.binding.viewpager.setCurrentItem(itemPosition,false)
             tab.icon = resources.getDrawable(R.drawable.tab_selector)
         }.attach()
     }

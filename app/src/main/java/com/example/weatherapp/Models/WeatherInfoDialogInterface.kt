@@ -7,5 +7,5 @@ created by
  * on ${2020/3/3} */
 
 interface WeatherInfoDialogInterface {
-    fun onClickListener(cityWheatherInfo: CityWheatherInfo)
+    fun onClickListener(cityWheatherInfo: CityWheatherInfo, position: Int)
 }

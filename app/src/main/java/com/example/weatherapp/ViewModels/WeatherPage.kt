@@ -28,6 +28,7 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var binding : FragmentWeatherPageBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -38,7 +39,8 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
 
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // the same Fragment instance will be used after the orientation change
@@ -72,6 +74,11 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
         super.onSaveInstanceState(outState)
         // To save state of the fragment where you can place data so that when you change orientaion
         // You wouldn't lose data.
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.e(TAG, "onPause: ${cityWheatherInfo.cityName}", )
     }
 
 

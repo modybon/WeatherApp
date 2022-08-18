@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
+import java.text.FieldPosition
 import java.util.*
 
 class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
@@ -64,15 +65,18 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         return false
     }
 
-    override fun onClickListener(cityWheatherInfo: CityWheatherInfo) {
-        Log.e(TAG, "onClickListener: City Clicked", )
-        Log.e(TAG, "onClickListener: $cityWheatherInfo", )
+    override fun onClickListener(cityWheatherInfo: CityWheatherInfo,position: Int) {
+        Log.e(TAG, "onClickListener: City Clicked")
+        Log.e(TAG, "onClickListener: $cityWheatherInfo +\nPosition: $position")
         var bundle = Bundle()
         var l = this.viewModel.citiesWheatherList.value
+        //Log.e(TAG, "onClickListener Value: $l", )
         bundle.putParcelableArrayList("List",this.viewModel.citiesWheatherList.value)
         val intent = Intent(this, MainActivity::class.java)
         //intent.putExtra("CitiesList",bundle)
         intent.putParcelableArrayListExtra("CitiesList",this.viewModel.citiesWheatherList.value)
+        intent.putExtra("ItemSelectedPosition",position)
+        // TODO: HAVE THE GETPOSITON BE SEPERATE FROM THE ONCLICKLISTENER
         startActivity(intent)
     }
 
@@ -180,7 +184,7 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
             if(location != null){
                 getAddress(location)
             }else{
-                Toast.makeText(this.baseContext,"Couldn't Fetch Address",Toast.LENGTH_LONG)
+                Toast.makeText(this.baseContext,"Couldn't Fetch Address",Toast.LENGTH_LONG).show()
             }
 
             //Log.e(TAG, "getLocation: ${location.toString()}", )
@@ -210,7 +214,15 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         }
     }
 
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+        super.onStatusChanged(provider, status, extras) // TODO: search ip this method
+    }
+
     override fun onLocationChanged(location: Location) {
         Log.e(TAG, "onLocationChanged: $location")
+    }
+
+    override fun onProviderEnabled(provider: String) {
+        super.onProviderEnabled(provider) // TODO: search ip this method
     }
 }

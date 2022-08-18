@@ -26,7 +26,7 @@ class RecyclerViewAdapter(
 
     class WeatherViewHolder(var binding: MiniWheatherInfoLayoutBinding) : RecyclerView.ViewHolder(binding.root){
         private val TAG = this@WeatherViewHolder.toString()
-        fun bind(currentWeatherInfo: CityWheatherInfo, clickListener: WeatherInfoDialogInterface){
+        fun bind(currentWeatherInfo: CityWheatherInfo, clickListener: WeatherInfoDialogInterface, position: Int){
             if(currentWeatherInfo.temp == null){
                 this.binding.cityNameTv.setText(currentWeatherInfo.cityName)
             }else{
@@ -38,7 +38,7 @@ class RecyclerViewAdapter(
                 this.binding.wheatherIcon.setBackgroundResource(currentWeatherInfo.icon!!)
             }
             itemView.setOnClickListener{
-                clickListener.onClickListener(currentWeatherInfo)
+                clickListener.onClickListener(currentWeatherInfo,position)
             }
         }
     }
@@ -48,7 +48,7 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
-        holder.bind(this.viewModel.list?.get(position),this.clickListener)
+        holder.bind(this.viewModel.list?.get(position),this.clickListener,position)
     }
 
     override fun getItemCount(): Int {
