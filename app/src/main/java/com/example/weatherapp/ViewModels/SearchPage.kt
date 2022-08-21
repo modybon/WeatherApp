@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import java.text.FieldPosition
 import java.util.*
 
@@ -208,6 +210,7 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         Log.e(TAG, "Country: ${country}")
         //TODO: IMPLEMENT CHANGE IN CITY DEPENDING ON LOCATION.
         //SharedPrefrencesManager.writeCurrentCity("CurrentCity",city)
+        SharedPrefrencesManager.writeCurrentCity("currentCity",city)
         SharedPrefrencesManager.writeCitiesList("Cities",city)
         this.viewModel.getWeather(city).invokeOnCompletion { it ->
             this.viewModel.addCity()
@@ -218,11 +221,51 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         super.onStatusChanged(provider, status, extras) // TODO: search ip this method
     }
 
+    fun getCity(location: Location) : String{
+        val geocoder: Geocoder = Geocoder(this, Locale.getDefault())
+        val address : List<Address>
+        address = geocoder.getFromLocation(location.latitude,location.longitude,1) // 1 represents the max location returned
+        Log.e(TAG, "getAddress: $address", )
+        val l = address[0]
+        val city = l.locality
+        Log.e(TAG, "GetCity: ${city}")
+        if(city!= null){
+            return city
+        }else{
+            return ""
+        }
+    }
     override fun onLocationChanged(location: Location) {
         Log.e(TAG, "onLocationChanged: $location")
+        var city = getCity(location)
+        Log.e(TAG, "onLocationChanged New City: $city")
+        var oldCity = this.viewModel.citiesWheatherList.value?.get(0)?.cityName
+        Log.e(TAG, "onLocationChanged Old City: $oldCity", )
+//        if(city != oldCity && oldCity != null){
+//            this.viewModel.getWeather(city).invokeOnCompletion {
+//                Log.e(TAG, "onLocationChanged Cities Before Removal: ${this.viewModel.citiesWheatherList.value}")
+//                SharedPrefrencesManager.removeCity("Cities",this.viewModel.citiesWheatherList.value?.get(0)?.cityName!!)
+//                //SharedPrefrencesManager.readCities("Cities").remove(this.viewModel.citiesWheatherList.value?.get(0)?.cityName)
+//                Log.e(TAG, "onLocationChanged Cities After Removal: ${this.viewModel.citiesWheatherList.value}")
+//                Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
+//                SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//                Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
+//                SharedPrefrencesManager.writeCitiesList("Cities",city)
+//                this.viewModel.citiesWheatherList.value?.removeFirst()
+//                this.viewModel.addCity()
+//                //Log.e(TAG, "onLocationChanged: ${this.viewModel.cityWheatherInfo}", )
+//                //Log.e(TAG, "onLocationChanged: Current City Has Changed ${it?.message.toString()}", )
+//                //Log.e(TAG, "onLocationChanged: Error: ${it?.message.toString()}")
+//            }
+//        }else{
+//            Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
+//        }
+        this.viewModel.currentCityChanged(city)
+        //Log.e(TAG, "onLocationChanged: ${this.viewModel.citiesWheatherList.value?.get(0)}", )
     }
 
     override fun onProviderEnabled(provider: String) {
-        super.onProviderEnabled(provider) // TODO: search ip this method
+        super.onProviderEnabled(provider)
+    // TODO: search ip this method
     }
 }

@@ -43,8 +43,8 @@ class PopUpWeatherInfoDialog(
                 viewModel.addCity()
                 SharedPrefrencesManager.writeCitiesList("Cities",cityWheatherInfo.cityName)
                 //var lol = viewModel.citiesWheatherList.value as List<CityWheatherInfo>;
-                Log.e(TAG, "onCreateDialog: ${viewModel.list.size}", )
-                Log.e(TAG, "onCreateDialog: ${viewModel.citiesWheatherList.value}", )
+                //Log.e(TAG, "onCreateDialog: ${viewModel.list.size}", )
+                //Log.e(TAG, "onCreateDialog: ${viewModel.citiesWheatherList.value}", )
                 dialog.dismiss()
                 //searchPage.list.postValue(this.wheatherInfo)
             })

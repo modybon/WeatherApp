@@ -38,6 +38,7 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
     }
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

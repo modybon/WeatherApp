@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
+import androidx.viewpager2.widget.ViewPager2
 import com.example.weatherapp.Models.CityWheatherInfo
 import com.example.weatherapp.Models.ViewPagerAdapter
 import com.example.weatherapp.R
@@ -56,6 +57,19 @@ class MainActivity : AppCompatActivity(){
             this.binding.viewpager.setCurrentItem(itemPosition,false)
             tab.icon = resources.getDrawable(R.drawable.tab_selector)
         }.attach()
+
+        var citiesArray : ArrayList<String> = ArrayList()
+        citiesArray.add("Hello")
+        citiesArray.add("Hi")
+        citiesArray.add("Yoo")
+        citiesArray.add(0,"First")
+        var citiesSet : MutableSet<String> = mutableSetOf()
+        for (i in 0 until citiesArray.size){
+            citiesSet.add(citiesArray[i])
+        }
+
+        Log.e(TAG, "onCreate Array: $citiesArray");
+        Log.e(TAG, "onCreate Array: ${citiesSet}");
     }
 
 }
