@@ -16,7 +16,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
@@ -30,6 +32,7 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
     lateinit var binding : ActivitySearchPageBinding
     lateinit var viewModel: ViewModel
     lateinit var recyclerViewAdapter: RecyclerViewAdapter
+    lateinit var swipeHelper: ItemTouchHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +53,28 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         this.binding.recyclerView.addItemDecoration(DividerItemDecoration(this,DividerItemDecoration.VERTICAL))
         this.binding.recyclerView.addItemDecoration(MarginItemDecoration(50))
         getLocation()
+        swipeGesture()
+        this.swipeHelper.attachToRecyclerView(this.binding.recyclerView)
+    }
+    fun swipeGesture(){
+        this.swipeHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                Log.e(TAG, "onMove: ${viewHolder.adapterPosition}", )
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
+                SharedPrefrencesManager.removeCity("Cities",viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
+                viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
+                recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
+            }
+
+        })
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
@@ -241,6 +266,18 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         Log.e(TAG, "onLocationChanged New City: $city")
         var oldCity = this.viewModel.citiesWheatherList.value?.get(0)?.cityName
         Log.e(TAG, "onLocationChanged Old City: $oldCity", )
+        this.viewModel.currentCityChanged(city)
+        //Log.e(TAG, "onLocationChanged: ${this.viewModel.citiesWheatherList.value?.get(0)}", )
+    }
+
+    override fun onProviderEnabled(provider: String) {
+        super.onProviderEnabled(provider)
+    // TODO: search ip this method
+    }
+}
+
+
+
 //        if(city != oldCity && oldCity != null){
 //            this.viewModel.getWeather(city).invokeOnCompletion {
 //                Log.e(TAG, "onLocationChanged Cities Before Removal: ${this.viewModel.citiesWheatherList.value}")
@@ -260,12 +297,3 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
 //        }else{
 //            Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
 //        }
-        this.viewModel.currentCityChanged(city)
-        //Log.e(TAG, "onLocationChanged: ${this.viewModel.citiesWheatherList.value?.get(0)}", )
-    }
-
-    override fun onProviderEnabled(provider: String) {
-        super.onProviderEnabled(provider)
-    // TODO: search ip this method
-    }
-}
