@@ -29,14 +29,22 @@ object SharedPrefrencesManager {
         with(sharedPreferences){
             if (this!!.contains(key)){
                 val l = sharedPreferences!!.getStringSet(key,null)!!.toSet()
-                return sharedPreferences!!.getStringSet(key,null)!!
+                return sharedPreferences!!.getStringSet(key,null)!!.toMutableSet()
             }
             return mutableSetOf<String>()
         }
     }
 
-    fun removeCity(key: String?,city:String){
-        this.readCities(key).remove(city)
+    fun removeCity(key: String?, deletedCity:String){
+        var newSet : MutableSet<String> = mutableSetOf()
+        this.readCities(key).forEach {
+            city -> if(city == deletedCity){
+            //this.readCities("Cities").remove(city)
+        }else{
+            newSet.add(city)
+        }
+        }
+        apply { sharedPreferences?.edit()?.putStringSet("Cities",newSet)?.apply() }
     }
 
     fun writeCurrentCity(key: String?, value: String?){

@@ -34,6 +34,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     private var metrics: String = "metric"
     var list: ArrayList<CityWheatherInfo> = arrayListOf<CityWheatherInfo>()
     var icon: Bitmap? = null
+    var CITIES_LIST_KEY = "Cities"
+    var CURRENT_CITY_KEY = "currentCity"
 
     //var citiesWheatherList : MutableLiveData<List<CityWheatherInfo>>
     var citiesWheatherList: MutableLiveData<ArrayList<CityWheatherInfo>>

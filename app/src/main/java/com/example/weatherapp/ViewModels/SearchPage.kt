@@ -69,11 +69,20 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
-                SharedPrefrencesManager.removeCity("Cities",viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
-                viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
-                recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
+                Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
+                try {
+                    SharedPrefrencesManager.removeCity("Cities",viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
+                    viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
+                    recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
+                }catch (e : Exception){
+                    Log.e(TAG, "onSwiped Error: ${e.message}", )
+                }
             }
 
+            override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                if(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == SharedPrefrencesManager.readCurrentCity(viewModel.CURRENT_CITY_KEY)) return 0
+                return super.getSwipeDirs(recyclerView, viewHolder)
+            }
         })
     }
 
