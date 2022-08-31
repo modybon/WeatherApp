@@ -12,7 +12,6 @@ import com.example.weatherapp.Models.WeatherType
 import com.example.weatherapp.managers.SharedPrefrencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -20,7 +19,6 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.collections.ArrayList
-import kotlin.coroutines.CoroutineContext
 
 /**
 
@@ -46,20 +44,20 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     }
 
     fun loadWeather(city: String) {
-        var ins: InputStream? = null;
-        var u: String =
+        val ins: InputStream?
+        val u =
             "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=${this.key}&units=$metrics"
         var result: String
         try {
-            var url = URL(u)
-            var connection = url.openConnection() as HttpURLConnection
+            val url = URL(u)
+            val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             //Log.e(TAG, " Worked loadWeather: ${connection.responseCode}", )
             ins = connection.inputStream
             result = ins.bufferedReader().use(BufferedReader::readText)
             Log.e(TAG, "Result loadWeather: ${result}")
-            var json = JSONObject(result)
-            var jsonarr = json.toJSONArray(json.names())
+            val json = JSONObject(result)
+            val jsonarr = json.toJSONArray(json.names())
             Log.e(TAG, "jsonarray: ${jsonarr}")
             var obj = jsonarr.getJSONArray(1).get(0) as JSONObject
 
@@ -91,12 +89,12 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
 
             when ((infodesc[0] as JSONObject).get("icon").toString()) {
                 "01n" ->{
-                    this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyDay.backgroundColor
-                    this.cityWheatherInfo.icon = WeatherType.clearSkyDay.iconRes
-                }
-                "01d" -> {
                     this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyNight.backgroundColor
                     this.cityWheatherInfo.icon = WeatherType.clearSkyNight.iconRes
+                }
+                "01d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.clearSkyDay.iconRes
                 }
                 "02d" -> {
                     this.cityWheatherInfo.backgroundColor = WeatherType.fewCloudsDay.backgroundColor
@@ -207,7 +205,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     }
 
     fun addCity(){
-        var isDuplicate : Boolean = false
+        var isDuplicate = false
         citiesWheatherList.value?.forEach {
             if(it.cityName == cityWheatherInfo.cityName){
                 isDuplicate = true
@@ -228,7 +226,6 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     }
 
     fun currentCityChanged(city: String) = viewModelScope.launch(Dispatchers.IO){
-        var oldCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
         //Log.e(TAG, "currentCityChanged: ${citiesWheatherList.value.isNullOrEmpty()}", )
         // TODO : TRY TO USE LET BECAUSE The code inside the let expression is executed only when the property is not null
         // TODO: DIFFRENCE BETWEEN also and let is that also would return the object while let you would need to specify the return or change the value
@@ -238,7 +235,6 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
             //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
             //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
             SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-            citiesWheatherList.value?.removeFirst()
             Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
             SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
             addCity()

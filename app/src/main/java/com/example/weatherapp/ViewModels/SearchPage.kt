@@ -191,14 +191,17 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         else{
             // When permission is granted
             //var location = provider?.let { locationManager.getLastKnownLocation(it) }
-            var location = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
-            var l = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
+
+            // Requesting location updates is what triggers onLocationChanged
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)
+            //var location = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
+            //var l = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
             // Last know location will not go and get the location itself it will only see if the phone fetched a location before and then it will give you that location
             if(provider != null){
                 var location =  locationManager.requestLocationUpdates(provider,400,1f,this)
                 Log.e(TAG, "getLocation: ${location.toString()}", )
             }
-            Log.e(TAG, "getLocation: ${location.toString()}")
+            //Log.e(TAG, "getLocation: ${location.toString()}")
         }
     }
 
@@ -251,6 +254,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 ) {
                     return
                 }else{
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)
                     locationManager.getLastKnownLocation(it)
                 }
             }
@@ -258,6 +262,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             var city = getCity(it)
             city?.let{
                 this.viewModel.getWeatherAsync(it).invokeOnCompletion {
+                    SharedPrefrencesManager.writeCurrentCity(this.viewModel.CURRENT_CITY_KEY,city)
                     this.viewModel.addCity()
                 }
                 return@onRequestPermissionsResult
@@ -265,24 +270,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             Toast.makeText(this.baseContext,"Couldn't Fetch Current Location",Toast.LENGTH_LONG).show()
         }
     }
-    private fun getAddress(location: Location){
-        val geocoder: Geocoder = Geocoder(this, Locale.getDefault())
-        val address : List<Address>
-        address = geocoder.getFromLocation(location.latitude,location.longitude,1) // 1 represents the max location returned
-        Log.e(TAG, "getAddress: $address", )
-        val l = address[0]
-        val city = l.locality
-        Log.e(TAG, "City: ${city}")
-        val country = l.countryName
-        Log.e(TAG, "Country: ${country}")
-        //TODO: IMPLEMENT CHANGE IN CITY DEPENDING ON LOCATION.
-        //SharedPrefrencesManager.writeCurrentCity("CurrentCity",city)
-        SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-        SharedPrefrencesManager.writeCitiesList("Cities",city)
-        this.viewModel.getWeatherAsync(city).invokeOnCompletion { it ->
-            this.viewModel.addCity()
-        }
-    }
+
 //    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
 //        super.onStatusChanged(provider, status, extras) // TODO: search ip this method
 //    }
@@ -313,16 +301,11 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             return
         }
         Log.e(TAG, "onLocationChanged: Current City Hasn't Changed")
-//        var oldCity = SharedPrefrencesManager.readCurrentCity(this.viewModel.CURRENT_CITY_KEY)
-//        Log.e(TAG, "onLocationChanged Old City: $oldCity")
-//        if(city != oldCity){
-//            this.viewModel.currentCityChanged(city)
-//        }
     }
 
     override fun onProviderEnabled(provider: String) {
         super.onProviderEnabled(provider)
-    // TODO: search ip this method
+        // TODO: search ip this method
     }
 }
 

@@ -1,6 +1,5 @@
 package com.example.weatherapp.ViewModels
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log

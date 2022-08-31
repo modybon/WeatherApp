@@ -7,17 +7,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.resources.R
 import androidx.fragment.app.DialogFragment
-import com.bumptech.glide.Glide
 import com.example.weatherapp.ViewModels.ViewModel
 import com.example.weatherapp.databinding.FragmentWeatherPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
-import java.lang.Exception
 import java.lang.IllegalStateException
-import java.net.URL
 
 /**
 
@@ -33,23 +28,21 @@ class PopUpWeatherInfoDialog(
     private val TAG = this@PopUpWeatherInfoDialog.toString()
     private lateinit var binding : FragmentWeatherPageBinding
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return activity?.let {
+        return activity.let {
             val builder = AlertDialog.Builder(it)
-            val inflater = requireActivity().layoutInflater
-            var handler = Handler(Looper.getMainLooper())
-            builder.setPositiveButton("Add",DialogInterface.OnClickListener{dialog,id->
+            builder.setPositiveButton("Add") { dialog, id ->
                 // TODO: ADD IT TO THE LIST
 //                viewModel.list.add(this.wheatherInfo)
 //                viewModel.wheatherList.postValue(viewModel.list)
                 viewModel.addCity()
-                SharedPrefrencesManager.writeCitiesList("Cities",cityWheatherInfo.cityName)
+                SharedPrefrencesManager.writeCitiesList("Cities", cityWheatherInfo.cityName)
                 //var lol = viewModel.citiesWheatherList.value as List<CityWheatherInfo>;
                 //Log.e(TAG, "onCreateDialog: ${viewModel.list.size}", )
                 //Log.e(TAG, "onCreateDialog: ${viewModel.citiesWheatherList.value}", )
                 dialog.dismiss()
                 //searchPage.list.postValue(this.wheatherInfo)
-            })
-            builder.setNegativeButton("Cancel",DialogInterface.OnClickListener{dialog,id->
+            }
+            builder.setNegativeButton("Cancel", {dialog, id->
                 viewModel.cityWheatherInfo = CityWheatherInfo()
                 dialog.dismiss()
             })

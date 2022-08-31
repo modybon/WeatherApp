@@ -17,6 +17,8 @@
         <entry key="app/src/main/res/drawable/ic_sunny.xml" value="0.223" />
         <entry key="app/src/main/res/drawable/light_gradient_background.xml" value="0.2935" />
         <entry key="app/src/main/res/drawable/light_search_icon.xml" value="0.22" />
+        <entry key="app/src/main/res/drawable/low_tempreture_icon.xml" value="0.2725" />
+        <entry key="app/src/main/res/drawable/pressureicon.xml" value="0.2725" />
         <entry key="app/src/main/res/drawable/searchview_rounded.xml" value="0.282" />
         <entry key="app/src/main/res/drawable/tab_indicator_default.xml" value="0.267" />
         <entry key="app/src/main/res/drawable/tab_indicator_selected.xml" value="0.267" />

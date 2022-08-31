@@ -1,9 +1,6 @@
 package com.example.weatherapp.Models
 
-import android.graphics.Color
-import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.example.weatherapp.R
 
 /**
 

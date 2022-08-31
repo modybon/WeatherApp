@@ -1,11 +1,9 @@
 package com.example.weatherapp.Models
 
-import android.graphics.Color
-import android.opengl.Visibility
+
 import android.os.Parcel
 import android.os.Parcelable
-import com.example.weatherapp.R
-import java.io.Serializable
+
 
 /**
 
@@ -13,7 +11,7 @@ created by
  * Studnet ID: 991563114
  * on ${2020/3/3} */
 
-public class CityWheatherInfo() : Parcelable{
+class CityWheatherInfo() : Parcelable{
     var lowTemp: Float? = null
     var highTemp: Float? = null
     var pressure: Int? = null
