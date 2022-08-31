@@ -2,6 +2,7 @@ package com.example.weatherapp.ViewModels
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.SearchManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -15,19 +16,15 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import java.text.FieldPosition
 import java.util.*
 
-class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
+class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
     private val TAG = this@SearchPage.toString()
     lateinit var binding : ActivitySearchPageBinding
     lateinit var viewModel: ViewModel
@@ -35,11 +32,15 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
     lateinit var swipeHelper: ItemTouchHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.e(TAG, "onCreate: Search Page onCreate", )
         super.onCreate(savedInstanceState)
         this.binding = ActivitySearchPageBinding.inflate(layoutInflater)
         this.viewModel = ViewModel(this.application)
+        var n : String? = null
+        n.let {
+            Log.e(TAG, "onCreate: $n")
+        }
         setContentView(binding.root)
-
         this.binding.recyclerView.layoutManager = LinearLayoutManager(this)
         this.binding.searchBar.setOnQueryTextListener(this)
         this.viewModel.setUp(applicationContext)
@@ -50,8 +51,7 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         }
         recyclerViewAdapter = RecyclerViewAdapter(this,this.viewModel,this)
         this.binding.recyclerView.adapter = recyclerViewAdapter
-        this.binding.recyclerView.addItemDecoration(DividerItemDecoration(this,DividerItemDecoration.VERTICAL))
-        this.binding.recyclerView.addItemDecoration(MarginItemDecoration(50))
+        this.binding.recyclerView.addItemDecoration(MarginItemDecoration(40))
         getLocation()
         swipeGesture()
         this.swipeHelper.attachToRecyclerView(this.binding.recyclerView)
@@ -80,21 +80,72 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
             }
 
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value?.size}", )
+                Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value}", )
                 if(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == SharedPrefrencesManager.readCurrentCity(viewModel.CURRENT_CITY_KEY)) return 0
                 return super.getSwipeDirs(recyclerView, viewHolder)
             }
         })
     }
 
+    override fun onBackPressed() {
+        Log.e(TAG, "onBackPressed: Back Been Pressed", )
+        super.onBackPressed()
+    }
+
+    override fun onDestroy() {
+        Log.e(TAG, "onDestroy: Search Page Destroyed", )
+        super.onDestroy()
+    }
+
+    override fun onStart() {
+        Log.e(TAG, "onStart: Search Page Started", )
+        super.onStart()
+    }
+
+    override fun onResume() {
+        Log.e(TAG, "onResume: Search Page Resumed", )
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        Log.e(TAG, "onRestart: Search Page Restarted", )
+        super.onRestart()
+    }
+
+    override fun finish() {
+        Log.e(TAG, "finish: Activity Finished", )
+        super.finish()
+    }
+
+    override fun onStop() {
+        Log.e(TAG, "onStop: Search Page Stopped", )
+        super.onStop()
+    }
+
+    override fun onPause() {
+        Log.e(TAG, "onPause: Search Page onPaused", )
+        super.onPause()
+    }
+
     override fun onQueryTextChange(newText: String): Boolean {
-        //Log.e(TAG, "onQueryTextChange: $newText", )
+        Log.e(TAG, "onQueryTextChange: $newText", )
         return false
     }
 
+    override fun onSearchRequested(): Boolean {
+        Log.e(TAG, "onSearchRequested: Existed Search Search")
+        return super.onSearchRequested()
+    }
     override fun onQueryTextSubmit(query: String): Boolean {
         // task HERE
+        if(Intent.ACTION_SEARCH == intent.action){
+            intent.getStringExtra(SearchManager.QUERY).also { query->
+                Log.e(TAG, "onCreate: $query", )
+            }
+        }
         Log.e(TAG, "onQueryTextSubmit: $query")
-        viewModel.getWeather(query).invokeOnCompletion {
+        viewModel.getWeatherAsync(query).invokeOnCompletion {
             val myDialog = PopUpWeatherInfoDialog(this.viewModel.cityWheatherInfo,this,this.viewModel)
             myDialog.show(this.supportFragmentManager,"MyDialog")
         }
@@ -102,8 +153,8 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
     }
 
     override fun onClickListener(cityWheatherInfo: CityWheatherInfo,position: Int) {
-        Log.e(TAG, "onClickListener: City Clicked")
-        Log.e(TAG, "onClickListener: $cityWheatherInfo +\nPosition: $position")
+        //Log.e(TAG, "onClickListener: City Clicked")
+        //Log.e(TAG, "onClickListener: $cityWheatherInfo +\nPosition: $position")
         var bundle = Bundle()
         var l = this.viewModel.citiesWheatherList.value
         //Log.e(TAG, "onClickListener Value: $l", )
@@ -112,7 +163,7 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         //intent.putExtra("CitiesList",bundle)
         intent.putParcelableArrayListExtra("CitiesList",this.viewModel.citiesWheatherList.value)
         intent.putExtra("ItemSelectedPosition",position)
-        // TODO: HAVE THE GETPOSITON BE SEPERATE FROM THE ONCLICKLISTENER
+        // TODO: HAVE THE GET POSITON BE SEPERATE FROM THE ONCLICKLISTENER
         startActivity(intent)
     }
 
@@ -122,14 +173,22 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         var cirtiria = Criteria() // indicating the application criteria for selecting a location provider.
         // Providers may be ordered according to accuracy, power usage, ability to report altitude, speed, bearing, and monetary cost.
         var provider = locationManager.getBestProvider(cirtiria,false)
+
+        val hasAccesCoarseLocationPermission = ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        val hasAccesFineLocationPermission = ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        val isGpsEnabled : Boolean = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
         Log.e(TAG, "getLocation Provider: ${provider.toString()}")
-        if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            // When the Permission is not Granted
+
+        if(!hasAccesCoarseLocationPermission || !hasAccesFineLocationPermission || !isGpsEnabled){
             Log.e(TAG, "getLocation: Permission not granted yet ", )
             this.requestPermission()
             return
-        }else{
+        }
+        else{
             // When permission is granted
             //var location = provider?.let { locationManager.getLastKnownLocation(it) }
             var location = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
@@ -168,7 +227,6 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
                 100
             )
         }
-        //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION),100)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -178,59 +236,34 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.e(TAG, "onRequestPermissionsResult: ${grantResults.toString()}", )
-        Log.e(TAG, "onRequestPermissionsResult: ${permissions}", )
+        Log.e(TAG, "onRequestPermissionsResult 1: $grantResults")
+        Log.e(TAG, "onRequestPermissionsResult 2: $permissions")
         var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         var cirtiria = Criteria()
         var provider = locationManager.getBestProvider(cirtiria,false)
         Log.e(TAG, "onRequestPermissionsResult: ${provider.toString()}", )
-
-        var location = provider?.let { if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-            //provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
-//            if(android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.S){
-//                locationManager.getCurrentLocation(provider,null,application.mainExecutor, {
-//                Log.e(TAG, "Current Location: $it", )
-//            })
-//            }else{
-//                locationManager.getLastKnownLocation(it)
-//            }
-            locationManager.getLastKnownLocation(it)
-        }
-
-        if(provider != null){
-            var l =  locationManager.requestLocationUpdates(provider,400,1f,this)
-            Log.e(TAG, "Location 1 : ${location.toString()}", )
-            Log.e(TAG, "l 1 : ${l.toString()}", )
-            if(location != null){
-                getAddress(location)
-            }else{
-                Toast.makeText(this.baseContext,"Couldn't Fetch Address",Toast.LENGTH_LONG).show()
+        Log.e(TAG, "onRequestPermissionsResult 3: ${grantResults.get(0)}", )
+        var location =
+            provider?.let {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }else{
+                    locationManager.getLastKnownLocation(it)
+                }
             }
-
-            //Log.e(TAG, "getLocation: ${location.toString()}", )
+        location?.let {
+            var city = getCity(it)
+            city?.let{
+                this.viewModel.getWeatherAsync(it).invokeOnCompletion {
+                    this.viewModel.addCity()
+                }
+                return@onRequestPermissionsResult
+            }
+            Toast.makeText(this.baseContext,"Couldn't Fetch Current Location",Toast.LENGTH_LONG).show()
         }
-        Log.e(TAG, "onRequestPermissionsResult 2: ${location.toString()}")
-
-        // Last know location will not go and get the location itself it will only see if the phone fetched a location before and then it will give you that location
-
-        //Log.e(TAG, "onRequestPermissionsResult: ${LocationRequest.CREATOR.createFromParcel().toString()}", )
-        // WHEN THE USER PRESSES ALLOW LOCATION THIS FIRES
     }
     private fun getAddress(location: Location){
         val geocoder: Geocoder = Geocoder(this, Locale.getDefault())
@@ -246,37 +279,45 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
         //SharedPrefrencesManager.writeCurrentCity("CurrentCity",city)
         SharedPrefrencesManager.writeCurrentCity("currentCity",city)
         SharedPrefrencesManager.writeCitiesList("Cities",city)
-        this.viewModel.getWeather(city).invokeOnCompletion { it ->
+        this.viewModel.getWeatherAsync(city).invokeOnCompletion { it ->
             this.viewModel.addCity()
         }
     }
+//    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+//        super.onStatusChanged(provider, status, extras) // TODO: search ip this method
+//    }
 
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-        super.onStatusChanged(provider, status, extras) // TODO: search ip this method
-    }
-
-    fun getCity(location: Location) : String{
-        val geocoder: Geocoder = Geocoder(this, Locale.getDefault())
-        val address : List<Address>
-        address = geocoder.getFromLocation(location.latitude,location.longitude,1) // 1 represents the max location returned
-        Log.e(TAG, "getAddress: $address", )
-        val l = address[0]
-        val city = l.locality
-        Log.e(TAG, "GetCity: ${city}")
-        if(city!= null){
-            return city
-        }else{
-            return ""
+    fun getCity(location: Location) : String?{
+        var city : String? = null
+        try{
+            val geocoder: Geocoder = Geocoder(this, Locale.getDefault())
+            val address : List<Address>
+            address = geocoder.getFromLocation(location.latitude,location.longitude,1) // 1 represents the max location returned
+            Log.e(TAG, "getAddress: $address", )
+            val l = address[0]
+            city = l.locality
+            Log.e(TAG, "GetCity: ${city}")
+        }catch (e: Exception){
+            Log.e(TAG, "getCity Error: ${e.message}", )
         }
+        return city
     }
     override fun onLocationChanged(location: Location) {
-        Log.e(TAG, "onLocationChanged: $location")
-        var city = getCity(location)
-        Log.e(TAG, "onLocationChanged New City: $city")
-        var oldCity = this.viewModel.citiesWheatherList.value?.get(0)?.cityName
-        Log.e(TAG, "onLocationChanged Old City: $oldCity", )
-        this.viewModel.currentCityChanged(city)
-        //Log.e(TAG, "onLocationChanged: ${this.viewModel.citiesWheatherList.value?.get(0)}", )
+        Log.e(TAG, "onLocationChanged new Location: $location")
+        var city = getCity(location) ?: SharedPrefrencesManager.readCurrentCity(this.viewModel.CURRENT_CITY_KEY)
+        Log.e(TAG, "onLocationChanged: $city")
+        if(city != SharedPrefrencesManager.readCurrentCity(viewModel.CURRENT_CITY_KEY)){
+            Log.e(TAG, "onLocationChanged New City: $city")
+            // TODO: CHANGE CURRENT CITY
+            this.viewModel.currentCityChanged(city)
+            return
+        }
+        Log.e(TAG, "onLocationChanged: Current City Hasn't Changed")
+//        var oldCity = SharedPrefrencesManager.readCurrentCity(this.viewModel.CURRENT_CITY_KEY)
+//        Log.e(TAG, "onLocationChanged Old City: $oldCity")
+//        if(city != oldCity){
+//            this.viewModel.currentCityChanged(city)
+//        }
     }
 
     override fun onProviderEnabled(provider: String) {
@@ -306,3 +347,39 @@ class SearchPage : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherI
 //        }else{
 //            Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
 //        }
+
+
+
+
+
+
+
+//        if(grantResults.get(0) == PackageManager.PERMISSION_GRANTED){
+//            Log.e(TAG, "onRequestPermissionsResult: Granted", )
+//
+//            return
+//        }
+//Log.e(TAG, "onRequestPermissionsResult: Not Granted", )
+//        var location = provider?.let {
+//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+//        {
+//            return@onRequestPermissionsResult
+//        }
+//            locationManager.getLastKnownLocation(it)
+//        }
+//        provider.let { // The code inside the let expression is executed only when the property is not null.
+//            var l =  locationManager.requestLocationUpdates(it!!,400,1f,this)
+//            Log.e(TAG, "Location 1 : ${location.toString()}", )
+//            Log.e(TAG, "l 1 : ${l.toString()}", )
+//            if(location != null){
+//                getAddress(location)
+//            }else{
+//                Toast.makeText(this.baseContext,"Couldn't Fetch Address",Toast.LENGTH_LONG).show()
+//            }
+//        }
+
+// Last know location will not go and get the location itself it will only see if the phone fetched a location before and then it will give you that location
+
+//Log.e(TAG, "onRequestPermissionsResult: ${LocationRequest.CREATOR.createFromParcel().toString()}", )
+// WHEN THE USER PRESSES ALLOW LOCATION THIS FIRES

@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_alignParentTop="true"
-    android:background="@color/black"
     tools:context=".ViewModels.WeatherPage"
     >
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,8 +15,10 @@
         android:orientation="vertical"
         >
         <LinearLayout
+            android:id="@+id/backGroundLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+
             android:orientation="vertical">
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -127,6 +128,7 @@
 
                 >
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/pressureCard"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
                     app:cardCornerRadius="15dp"

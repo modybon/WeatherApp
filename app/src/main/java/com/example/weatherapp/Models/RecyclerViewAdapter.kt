@@ -1,16 +1,14 @@
 package com.example.weatherapp.Models
 
 import android.content.Context
-import android.util.Log
+import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import com.example.weatherapp.R
 import com.example.weatherapp.ViewModels.ViewModel
 import com.example.weatherapp.databinding.MiniWheatherInfoLayoutBinding
-import java.lang.Exception
-import java.net.URL
+import com.example.weatherapp.managers.SharedPrefrencesManager
 
 /**
 
@@ -27,15 +25,26 @@ class RecyclerViewAdapter(
     class WeatherViewHolder(var binding: MiniWheatherInfoLayoutBinding) : RecyclerView.ViewHolder(binding.root){
         private val TAG = this@WeatherViewHolder.toString()
         fun bind(currentWeatherInfo: CityWheatherInfo, clickListener: WeatherInfoDialogInterface, position: Int){
+            var c : String = ""
+            c.apply {
+                if((currentWeatherInfo.cityName == SharedPrefrencesManager.readCurrentCity("currentCity"))){
+                    c = "My Location"
+                }else{
+                    c = currentWeatherInfo.cityName.toString()
+                }
+            }
             if(currentWeatherInfo.temp == null){
-                this.binding.cityNameTv.setText(currentWeatherInfo.cityName)
+                this.binding.cityNameTv.setText(c)
+                this.binding.backGroundLayout.setBackgroundColor(R.color.blue!!)
+                return
             }else{
-                this.binding.cityNameTv.setText(currentWeatherInfo.cityName)
+                this.binding.cityNameTv.setText(c)
                 this.binding.countryNameTv.setText(currentWeatherInfo.countryName)
                 this.binding.tempTv.setText( String.format("%.0f",currentWeatherInfo.temp) + "°")
                 this.binding.extraInfoTv.setText("H:${String.format("%.0f",currentWeatherInfo.highTemp)}°"+" L:${String.format("%.0f",currentWeatherInfo.lowTemp)}°")
                 this.binding.descTv.setText(currentWeatherInfo.desc)
                 this.binding.wheatherIcon.setBackgroundResource(currentWeatherInfo.icon!!)
+                this.binding.backGroundLayout.setBackgroundColor(Color.parseColor(currentWeatherInfo.backgroundColor?:"#696969"))
             }
             itemView.setOnClickListener{
                 clickListener.onClickListener(currentWeatherInfo,position)
@@ -48,11 +57,11 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
-        holder.bind(this.viewModel.list?.get(position),this.clickListener,position)
+        this.viewModel.citiesWheatherList.value?.let { holder.bind(it.get(position),this.clickListener,position) }
     }
 
     override fun getItemCount(): Int {
-        return this.viewModel.list?.size
+        return this.viewModel.citiesWheatherList.value?.size ?: 0
     }
 
 }

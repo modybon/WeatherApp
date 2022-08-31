@@ -3,6 +3,7 @@ package com.example.weatherapp.Models
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -71,6 +72,7 @@ class PopUpWeatherInfoDialog(
             this.binding.windTextView.setText(this.cityWheatherInfo.windSpeed.toString())
             this.binding.descTv.setText(this.cityWheatherInfo.desc)
             this.binding.icon.setBackgroundResource(this.cityWheatherInfo.icon!!)
+            this.binding.backGroundLayout.setBackgroundColor(Color.parseColor(this.cityWheatherInfo.backgroundColor ?: "#696969"))
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }

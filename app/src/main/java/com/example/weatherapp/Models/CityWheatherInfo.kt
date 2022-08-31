@@ -1,8 +1,10 @@
 package com.example.weatherapp.Models
 
+import android.graphics.Color
 import android.opengl.Visibility
 import android.os.Parcel
 import android.os.Parcelable
+import com.example.weatherapp.R
 import java.io.Serializable
 
 /**
@@ -25,6 +27,7 @@ public class CityWheatherInfo() : Parcelable{
     var countryName : String? = null
     var desc : String? = null
     var icon : Int? = 0
+    var backgroundColor : String? = null
 
     constructor(parcel: Parcel) : this() {
         lowTemp = parcel.readValue(Float::class.java.classLoader) as? Float
@@ -40,6 +43,7 @@ public class CityWheatherInfo() : Parcelable{
         countryName = parcel.readString().toString()
         desc = parcel.readString().toString()
         icon = parcel.readInt()
+        backgroundColor = parcel.readString()
     }
 
     override fun toString(): String {
@@ -51,7 +55,8 @@ public class CityWheatherInfo() : Parcelable{
                 "\n Wind Speed : ${this.windSpeed}, Wind Degree: ${this.windDegree}" +
                 "\n Feels Like : ${this.feelsLike}" +
                 "\n Humidity : ${this.humidity}" +
-                "\n Icon: ${this.icon}"
+                "\n Icon: ${this.icon}" +
+                "\n Color : ${this.backgroundColor}"
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -68,6 +73,7 @@ public class CityWheatherInfo() : Parcelable{
         parcel.writeString(countryName)
         parcel.writeString(desc)
         parcel.writeInt(icon!!)
+        parcel.writeString(backgroundColor)
     }
 
     override fun describeContents(): Int {

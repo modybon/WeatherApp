@@ -25,7 +25,7 @@
                     android:id="@+id/backGroundLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/blue"
+
                     android:orientation="vertical"
                     app:layout_constraintTop_toTopOf="parent">
                     <androidx.constraintlayout.widget.ConstraintLayout

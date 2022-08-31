@@ -8,6 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
-    <color name="blue">#72bcd4</color>
+    <color name="blue">#60BEEB</color>
+    <color name="dark_blue">#338BA8</color>
     <color name="grey">#696969</color>
+    <color name="orange">#FFA500</color>
+    <color name="cyan">#00FFFF</color>
+    <color name="cloudy_cyan">#bbcdd4</color>
+    <color name="light_orange">#FFD68A</color>
+    <color name="thunderStromDay">#CCD6E2</color>
+    <color name="thunderStromNight">#9098a1</color>
+    <color name="diamond">#C0F6FB</color>
 </resources>

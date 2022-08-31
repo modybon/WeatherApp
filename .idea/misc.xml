@@ -24,11 +24,15 @@
         <entry key="app/src/main/res/drawable/wind.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_search_page.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_searchable.xml" value="0.1381340579710145" />
         <entry key="app/src/main/res/layout/fragment_weather_page.xml" value="0.21802978515625002" />
         <entry key="app/src/main/res/layout/mini_wheather_info_layout.xml" value="0.1377952755905512" />
+        <entry key="app/src/main/res/layout/searchable.xml" value="0.1546875" />
         <entry key="app/src/main/res/layout/test.xml" value="0.2375" />
         <entry key="app/src/main/res/menu/botnavbarmenu.xml" value="0.33125" />
+        <entry key="app/src/main/res/menu/citiesmenu.xml" value="0.2726495726495726" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.3335" />
+        <entry key="app/src/main/res/xml/searchable.xml" value="0.1" />
       </map>
     </option>
   </component>

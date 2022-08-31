@@ -1,16 +1,17 @@
 package com.example.weatherapp.ViewModels
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
+import androidx.core.content.ContextCompat
 import com.example.weatherapp.Models.CityWheatherInfo
+import com.example.weatherapp.R
 import com.example.weatherapp.databinding.FragmentWeatherPageBinding
-import java.lang.Exception
-import java.net.URL
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,8 +38,6 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
         }
     }
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,13 +49,6 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentWeatherPageBinding.inflate(layoutInflater,container,false)
         //return inflater.inflate(R.layout.fragment_weather_page, container, false)
-//        var url = URL("https://openweathermap.org/img/wn/${this.cityWheatherInfo.icon}@2x.png")
-//        try {
-//            Glide.with(this.requireActivity().baseContext).load(url).into(this.binding.icon)
-//        }catch (e: Exception){
-//            Log.e(TAG, "onCreateDialog: Eror Loading Image", )
-//        }
-
         this.binding.cityNameTv.setText(this.cityWheatherInfo.cityName)
         this.binding.tempTv.setText(String.format("%.0f",this.cityWheatherInfo.temp))
         this.binding.feelsLikeTextView.setText(String.format("%.0f",this.cityWheatherInfo.feelsLike) + '°')
@@ -68,6 +60,9 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
         this.binding.windTextView.setText(this.cityWheatherInfo.windSpeed.toString())
         this.binding.descTv.setText(this.cityWheatherInfo.desc)
         this.binding.icon.setBackgroundResource(this.cityWheatherInfo.icon!!)
+        //this.binding.backGroundLayout.setBackgroundColor(Color.parseColor("#FFA500"))
+        this.binding.backGroundLayout.setBackgroundColor(Color.parseColor(this.cityWheatherInfo.backgroundColor ?: "#696969"))
+        //cardView.setCardBackgroundColor(ContextCompat.getColor(requireActivity().baseContext, R.color.your_color_name));
         return binding.root
     }
 
@@ -103,3 +98,10 @@ class WeatherPage(private val cityWheatherInfo: CityWheatherInfo) : Fragment() {
 //            }
 //    }
 }
+
+//        var url = URL("https://openweathermap.org/img/wn/${this.cityWheatherInfo.icon}@2x.png")
+//        try {
+//            Glide.with(this.requireActivity().baseContext).load(url).into(this.binding.icon)
+//        }catch (e: Exception){
+//            Log.e(TAG, "onCreateDialog: Eror Loading Image", )
+//        }

@@ -1,20 +1,15 @@
 package com.example.weatherapp.ViewModels
 
 import android.content.Intent
-import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
-import androidx.viewpager2.widget.ViewPager2
+import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp.Models.CityWheatherInfo
 import com.example.weatherapp.Models.ViewPagerAdapter
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ActivityMainBinding
-import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(){
     private val TAG = this@MainActivity.toString()
@@ -38,13 +33,20 @@ class MainActivity : AppCompatActivity(){
         //Log.e(TAG, "TEST onCreate: ${intentExtras.getBundle("CitiesList")?.getParcelableArrayList<Parcelable>("CitiesList")?.toMutableList().toString()}")
         //Log.e(TAG, "TEST 2 onCreate: ${intentExtras.get("CitiesList")}")
         data = intentExtras.get("CitiesList") as ArrayList<CityWheatherInfo>
-        Log.e(TAG, "onCreate MainActivity: ${data[0]}", )
+        //Log.e(TAG, "onCreate MainActivity: ${data[0]}", )
         //Log.e(TAG, "TEST 3 onCreate: ${i}")
         // Bundle[{CitiesList=Bundle[{List=[$
         this.binding.searchPageBtn.setOnClickListener{
-            Log.e(TAG, "onCreate: Search Page ", )
-            val intent = Intent(this,SearchPage::class.java)
-            startActivity(intent)
+            //val intent = Intent(this,SearchPage::class.java)
+            // SingleTask as launch mode will retreive the previous instance
+            // of this activity since it is the root and will destroy all above activities
+            // the activity starts in a new task tho
+            //startActivity(intent)
+            onBackPressed() // works well as well and it will remain in the same task
+            //onBackPressed() // finishes current activty and goes back to the previous one
+            // finish() closes the open activty calls onDestroy()
+            //finishAffinity() // Deletes all activities below this one
+
         }
         viewModel = ViewModel(this.application)
         super.onCreate(savedInstanceState)
@@ -53,23 +55,14 @@ class MainActivity : AppCompatActivity(){
         TabLayoutMediator(this.binding.tabLayout,this.binding.viewpager){ tab, position ->
             // tab is the for the tabs below
             // positions is referring to the position of the view pager
-            Log.e(TAG, "Main onCreate: TAB $position", )
+            //Log.e(TAG, "Main onCreate: TAB $position", )
             this.binding.viewpager.setCurrentItem(itemPosition,false)
             tab.icon = resources.getDrawable(R.drawable.tab_selector)
         }.attach()
-
-        var citiesArray : ArrayList<String> = ArrayList()
-        citiesArray.add("Hello")
-        citiesArray.add("Hi")
-        citiesArray.add("Yoo")
-        citiesArray.add(0,"First")
-        var citiesSet : MutableSet<String> = mutableSetOf()
-        for (i in 0 until citiesArray.size){
-            citiesSet.add(citiesArray[i])
-        }
-
-        Log.e(TAG, "onCreate Array: $citiesArray");
-        Log.e(TAG, "onCreate Array: ${citiesSet}");
+    }
+    override fun onDestroy() {
+        Log.e(TAG, "onDestroy: Main Activity Destroyed")
+        super.onDestroy()
     }
 
 }

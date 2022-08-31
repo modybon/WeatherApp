@@ -3,15 +3,13 @@ package com.example.weatherapp.ViewModels
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.Database.CitiesRepositoriy
 import com.example.weatherapp.Models.CityWheatherInfo
+import com.example.weatherapp.Models.WeatherType
 import com.example.weatherapp.managers.SharedPrefrencesManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,6 +19,8 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 
 /**
 
@@ -28,7 +28,7 @@ created by
  * Studnet ID: 991563114
  * on ${2020/3/3} */
 
-class ViewModel(application: Application) : AndroidViewModel(application) {
+class ViewModel (application: Application) : AndroidViewModel(application) {
     private val TAG = this@ViewModel.toString()
     private val key: String = "fd6b5b197e705ecbec520c688fc640bb"
     private var metrics: String = "metric"
@@ -36,8 +36,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     var icon: Bitmap? = null
     var CITIES_LIST_KEY = "Cities"
     var CURRENT_CITY_KEY = "currentCity"
-
-    //var citiesWheatherList : MutableLiveData<List<CityWheatherInfo>>
+    var currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
     var citiesWheatherList: MutableLiveData<ArrayList<CityWheatherInfo>>
     var cityWheatherInfo: CityWheatherInfo
 
@@ -66,8 +65,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
             var infodesc = jsonarr[1] as JSONArray
             Log.e(TAG, "Info Desc: ${(infodesc[0] as JSONObject).get("description")}")
-            var tempInfo =
-                jsonarr[3] as JSONObject // temp, feels Like , temp_min, temp_max, pressure, humidity
+            var tempInfo = jsonarr[3] as JSONObject // temp, feels Like , temp_min, temp_max, pressure, humidity
             Log.e(TAG, "Temp Info : ${tempInfo}")
             var tempInfo2 = jsonarr[4] // Pressure
             Log.e(TAG, "Temp Info 2: ${tempInfo2}")
@@ -90,25 +88,80 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 //   var windDegree = tempInfo3.getString("deg").toFloat()
 //   var cityName = tempInfo4.toString()
 //   var country = tempInfo5.get("country").toString()
+
             when ((infodesc[0] as JSONObject).get("icon").toString()) {
-                "01n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.onen)
-                "01d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.oned)
-                "02d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.twod)
-                "02n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.twon)
-                "03d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.threed)
-                "03n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.threen)
-                "04d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.fourd)
-                "04n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.fourn)
-                "09d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.nined)
-                "09n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.ninen)
-                "10d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.tend)
-                "10n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.tenn)
-                "11d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.elevend)
-                "11n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.elevenn)
-                "13d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.thirteend)
-                "13n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.thirteenn)
-                "50d" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.fiftyd)
-                "50n" -> this.cityWheatherInfo.icon = (com.example.weatherapp.R.drawable.fiftyn)
+                "01n" ->{
+                    this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.clearSkyDay.iconRes
+                }
+                "01d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.clearSkyNight.iconRes
+                }
+                "02d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.fewCloudsDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.fewCloudsNight.iconRes
+                }
+                "02n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.fewCloudsNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.fewCloudsNight.iconRes
+                }
+                "03d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.scatteredCloudsDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.scatteredCloudsDay.iconRes
+                }
+                "03n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.scatteredCloudsNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.scatteredCloudsNight.iconRes
+                }
+                "04d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.brokenCloudsDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.brokenCloudsDay.iconRes
+                }
+                "04n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.brokenCloudsNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.brokenCloudsNight.iconRes
+                }
+                "09d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.showerRainDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.showerRainDay.iconRes
+                }
+                "09n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.showerRainNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.showerRainNight.iconRes
+                }
+                "10d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.rainDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.rainDay.iconRes
+                }
+                "10n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.rainNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.rainNight.iconRes
+                }
+                "11d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.thunderstormnDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.thunderstormnDay.iconRes
+                }
+                "11n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.thunderstormNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.thunderstormNight.iconRes
+                }
+                "13d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.snownDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.thunderstormnDay.iconRes
+                }
+                "13n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.snowNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.snowNight.iconRes
+                }
+                "50d" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.mistDay.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.mistDay.iconRes
+                }
+                "50n" -> {
+                    this.cityWheatherInfo.backgroundColor = WeatherType.mistNight.backgroundColor
+                    this.cityWheatherInfo.icon = WeatherType.mistNight.iconRes
+                }
             }
             this.cityWheatherInfo.cityName = tempInfo4.toString()
             this.cityWheatherInfo.temp = tempInfo.getString("temp").toFloat()
@@ -122,15 +175,12 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             this.cityWheatherInfo.windDegree = tempInfo3.getString("deg").toFloat()
             this.cityWheatherInfo.countryName = tempInfo5.get("country").toString()
             this.cityWheatherInfo.desc = (infodesc[0] as JSONObject).get("description").toString()
-            //this.cityWheatherInfo.icon = (infodesc[0] as JSONObject).get("icon").toString() + ".png"
-
-            Log.e(TAG, "TEST RUN: ${cityWheatherInfo.toString()}")
-            Log.e(
-                TAG,
-                "TEST RUN ------------------------------------------------------------------------------"
-            )
-
-            Log.e(TAG, "Obj: ${obj}")
+//            Log.e(TAG, "TEST RUN: ${cityWheatherInfo.toString()}")
+//            Log.e(
+//                TAG,
+//                "TEST RUN ------------------------------------------------------------------------------"
+//            )
+//            Log.e(TAG, "Obj: ${obj}")
 
         } catch (exec: Exception) {
             Log.e(TAG, "Error loadWeather: ${exec.message}")
@@ -138,55 +188,79 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getWeather(city: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun getWeatherAsync(city: String) = viewModelScope.launch(Dispatchers.IO) {
         loadWeather(city)
     }
 
     fun setUp(context: Context) = viewModelScope.launch(Dispatchers.IO) {
         SharedPrefrencesManager.init(context)
-        Log.e(TAG, "setUp: ${SharedPrefrencesManager.readCities("Cities")}", )
-        SharedPrefrencesManager.readCities("Cities").forEach { city ->
+        Log.e(TAG, "setUp: ${SharedPrefrencesManager.readCities(CITIES_LIST_KEY)}", )
+        SharedPrefrencesManager.readCities(CITIES_LIST_KEY).forEach { city ->
             Log.e(TAG, "TEST RUN onCreate: City Name: $city")
             //Log.e(TAG, "TEST RUN setUp: ${citiesWheatherList.value!!.size.toString()}", )
-            //getWeather(city).invokeOnCompletion { addCity() }
+//            getWeather(city).invokeOnCompletion {
+//                addCity()
+//            }
             loadWeather(city)
             addCity()
         }
     }
 
-    fun addCity() = viewModelScope.launch(Dispatchers.IO) {
-        if (cityWheatherInfo.cityName == SharedPrefrencesManager.readCurrentCity("currentCity")) {
-            list.add(0, cityWheatherInfo)
-        } else {
-            list.add(list.size, cityWheatherInfo)
+    fun addCity(){
+        var isDuplicate : Boolean = false
+        citiesWheatherList.value?.forEach {
+            if(it.cityName == cityWheatherInfo.cityName){
+                isDuplicate = true
+                return@forEach
+            }
         }
-        Log.e(TAG, "addCity: ${list.size}")
-        citiesWheatherList.postValue(list)
-        //citiesWheatherList.value = list
-        //citiesRep.allCities.postValue(list)
-        cityWheatherInfo = CityWheatherInfo()
+        if(!isDuplicate){
+            if (cityWheatherInfo.cityName == SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)) {
+                list.add(0, cityWheatherInfo)
+            } else {
+                list.add(list.size, cityWheatherInfo)
+            }
+            //Log.e(TAG, "addCity: ${list.size}")
+            citiesWheatherList.postValue(list) // notifies observes that data has changed
+            //citiesWheatherList.value = list // Cannot use setValue because its on a background thread
+            cityWheatherInfo = CityWheatherInfo()
+        }
     }
 
     fun currentCityChanged(city: String) = viewModelScope.launch(Dispatchers.IO){
-        var oldCity = SharedPrefrencesManager.readCurrentCity("currentCity")
-        if(city != oldCity && oldCity != null){
-            getWeather(city).invokeOnCompletion {
-                Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
-                SharedPrefrencesManager.removeCity("Cities",citiesWheatherList.value?.get(0)?.cityName!!)
-                //SharedPrefrencesManager.readCities("Cities").remove(this.viewModel.citiesWheatherList.value?.get(0)?.cityName)
-                Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
-                Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
+        var oldCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
+        //Log.e(TAG, "currentCityChanged: ${citiesWheatherList.value.isNullOrEmpty()}", )
+        // TODO : TRY TO USE LET BECAUSE The code inside the let expression is executed only when the property is not null
+        // TODO: DIFFRENCE BETWEEN also and let is that also would return the object while let you would need to specify the return or change the value
+        loadWeather(city)
+        if((citiesWheatherList.value.isNullOrEmpty())){
+            //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
+            //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+            //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+            SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+            citiesWheatherList.value?.removeFirst()
+            Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+            SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+            addCity()
+        }else{
+            //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
+            if(citiesWheatherList.value?.get(0)?.cityName!! == SharedPrefrencesManager.readCurrentCity("currentCity")){
+                SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,citiesWheatherList.value?.get(0)?.cityName!!)
+                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
                 SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-                Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
-                SharedPrefrencesManager.writeCitiesList("Cities",city)
+                //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+                SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
                 citiesWheatherList.value?.removeFirst()
                 addCity()
-                //Log.e(TAG, "onLocationChanged: ${this.viewModel.cityWheatherInfo}", )
-                //Log.e(TAG, "onLocationChanged: Current City Has Changed ${it?.message.toString()}", )
-                //Log.e(TAG, "onLocationChanged: Error: ${it?.message.toString()}")
+            }else{
+                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+                SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+                //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+                SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+                addCity()
             }
-        }else{
-            Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
         }
     }
 
@@ -195,3 +269,44 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         Log.e(TAG, "onCleared: ")
     }
 }
+
+
+
+
+//
+//
+//if(city != oldCity && oldCity != null){
+//    getWeatherAsync(city).invokeOnCompletion {
+//        if((citiesWheatherList.value.isNullOrEmpty())){
+//            //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
+//            //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+//            //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//            SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//            Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//            SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//            citiesWheatherList.value?.removeFirst()
+//            addCity()
+//        }else{
+//            //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
+//            if(citiesWheatherList.value?.get(0)?.cityName!! == SharedPrefrencesManager.readCurrentCity("currentCity")){
+//                SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,citiesWheatherList.value?.get(0)?.cityName!!)
+//                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+//                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//                SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//                //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//                SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//                citiesWheatherList.value?.removeFirst()
+//                addCity()
+//            }else{
+//                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+//                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//                SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//                //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//                SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//                addCity()
+//            }
+//        }
+//    }
+//}else{
+//    Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
+//}
