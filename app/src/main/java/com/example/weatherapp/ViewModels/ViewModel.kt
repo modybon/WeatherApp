@@ -34,10 +34,12 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     var icon: Bitmap? = null
     var CITIES_LIST_KEY = "Cities"
     var CURRENT_CITY_KEY = "currentCity"
-    var currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
+    private var currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
     var citiesWheatherList: MutableLiveData<ArrayList<CityWheatherInfo>>
     var cityWheatherInfo: CityWheatherInfo
     init {
+        SharedPrefrencesManager.init(application)
+        currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
         Log.e(TAG, "ViewModel Start")
         this.citiesWheatherList = MutableLiveData<ArrayList<CityWheatherInfo>>()
         cityWheatherInfo = CityWheatherInfo()
@@ -196,7 +198,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
 
 
     fun setUp(context: Context) = viewModelScope.launch(Dispatchers.IO) {
-        SharedPrefrencesManager.init(context)
+
         Log.e(TAG, "setUp: ${SharedPrefrencesManager.readCities(CITIES_LIST_KEY)}")
         val threadName = Thread.currentThread().name
         SharedPrefrencesManager.readCities(CITIES_LIST_KEY).forEach { city ->
@@ -205,11 +207,6 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
             loadWeather(city)
             addCities()
         }
-    }
-
-    fun addcity(cityinfo : CityWheatherInfo){
-        list.add(cityinfo)
-        citiesWheatherList.postValue(list)
     }
 
     fun addCities(){
@@ -246,6 +243,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
             SharedPrefrencesManager.writeCurrentCity("currentCity",city)
             Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
             SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+            currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
             addCities()
         }else{
             //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
@@ -257,6 +255,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
                 //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
                 SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
                 citiesWheatherList.value?.removeFirst()
+                currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
                 addCities()
             }else{
                 //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
@@ -272,6 +271,22 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         Log.e(TAG, "onCleared Search Page: View Model Cleared")
+    }
+
+    fun removeCity(city: String) = viewModelScope.launch(Dispatchers.IO) {
+        SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,city)
+    }
+
+    fun writeCurrentCity(city:String) = viewModelScope.launch(Dispatchers.IO) {
+        SharedPrefrencesManager.writeCurrentCity(CURRENT_CITY_KEY,city)
+    }
+    fun writeCitiesList(city : String) = viewModelScope.launch(Dispatchers.IO) {
+        SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+    }
+
+    fun getCurrentCity(): String{
+        Log.e(TAG, "getCurrentCity: $currentCity", )
+        return currentCity
     }
 }
 

@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
-import com.example.weatherapp.managers.SharedPrefrencesManager
 import java.util.*
 
 class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
@@ -46,7 +45,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 Log.e(TAG, "onCreate dialog state3: ${getParcelableArrayList<CityWheatherInfo>(saved)}")
                 viewModel.list = getParcelableArrayList("WeatherList")?: arrayListOf()
                 viewModel.citiesWheatherList.value = getParcelableArrayList("WeatherList")
-                cityInfo = getParcelable<CityWheatherInfo>("cityDialog")?: CityWheatherInfo()
+                cityInfo = getParcelable("cityDialog")?: CityWheatherInfo()
             }
         }else{
             this.viewModel.setUp(applicationContext)
@@ -91,7 +90,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 //Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
                 //Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
                 try {
-                    SharedPrefrencesManager.removeCity("Cities",viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
+                    viewModel.removeCity(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
                     viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
                     recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
                 }catch (e : Exception){
@@ -102,7 +101,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
                 Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value?.size}", )
                 Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value}", )
-                if(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == SharedPrefrencesManager.readCurrentCity(viewModel.CURRENT_CITY_KEY)) return 0
+                if(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == viewModel.getCurrentCity()) return 0
                 return super.getSwipeDirs(recyclerView, viewHolder)
             }
         })
@@ -237,10 +236,9 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             city?.let{
                 this.viewModel.getWeatherAsync(it).invokeOnCompletion {
                     // TODO: MOVE IT TO VIEWMODEL
-                    SharedPrefrencesManager.writeCurrentCity(this.viewModel.CURRENT_CITY_KEY,city)
-                    SharedPrefrencesManager.writeCitiesList(this.viewModel.CITIES_LIST_KEY,city)
+                    viewModel.writeCurrentCity(city)
+                    viewModel.writeCitiesList(city)
                     this.viewModel.addCities()
-                    Log.e(TAG, "onRequestPermissionsResult: ${SharedPrefrencesManager.readCities(this.viewModel.CITIES_LIST_KEY)}", )
                 }
                 return@onRequestPermissionsResult
             }
@@ -265,9 +263,9 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     }
     override fun onLocationChanged(location: Location) {
         Log.e(TAG, "onLocationChanged new Location: $location")
-        var city = getCity(location) ?: SharedPrefrencesManager.readCurrentCity(this.viewModel.CURRENT_CITY_KEY)
+        var city = getCity(location) ?: viewModel.getCurrentCity()
         Log.e(TAG, "onLocationChanged: $city")
-        if(city != SharedPrefrencesManager.readCurrentCity(viewModel.CURRENT_CITY_KEY)){
+        if(city != viewModel.getCurrentCity()){
             Log.e(TAG, "onLocationChanged New City: $city")
             // TODO: CHANGE CURRENT CITY
             this.viewModel.currentCityChanged(city)
@@ -322,29 +320,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     }
 
 }
-
-
-
-//        if(city != oldCity && oldCity != null){
-//            this.viewModel.getWeather(city).invokeOnCompletion {
-//                Log.e(TAG, "onLocationChanged Cities Before Removal: ${this.viewModel.citiesWheatherList.value}")
-//                SharedPrefrencesManager.removeCity("Cities",this.viewModel.citiesWheatherList.value?.get(0)?.cityName!!)
-//                //SharedPrefrencesManager.readCities("Cities").remove(this.viewModel.citiesWheatherList.value?.get(0)?.cityName)
-//                Log.e(TAG, "onLocationChanged Cities After Removal: ${this.viewModel.citiesWheatherList.value}")
-//                Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
-//                SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-//                Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity("currentCity")}")
-//                SharedPrefrencesManager.writeCitiesList("Cities",city)
-//                this.viewModel.citiesWheatherList.value?.removeFirst()
-//                this.viewModel.addCity()
-//                //Log.e(TAG, "onLocationChanged: ${this.viewModel.cityWheatherInfo}", )
-//                //Log.e(TAG, "onLocationChanged: Current City Has Changed ${it?.message.toString()}", )
-//                //Log.e(TAG, "onLocationChanged: Error: ${it?.message.toString()}")
-//            }
-//        }else{
-//            Log.e(TAG, "onLocationChanged: City Hasn't Changed", )
-//        }
-
 
 
 
