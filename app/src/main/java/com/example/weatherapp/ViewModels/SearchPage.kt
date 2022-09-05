@@ -30,32 +30,52 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     lateinit var viewModel: ViewModel
     lateinit var recyclerViewAdapter: RecyclerViewAdapter
     lateinit var swipeHelper: ItemTouchHelper
-
+    lateinit var locationManager: LocationManager
+    private val saved = "WeatherList"
+    private lateinit var dialog : PopUpWeatherInfoDialog
+    var cityInfo : CityWheatherInfo = CityWheatherInfo()
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState) // Always call the super class first
         Log.e(TAG, "onCreate: Search Page onCreate", )
-        super.onCreate(savedInstanceState)
-        this.binding = ActivitySearchPageBinding.inflate(layoutInflater)
         this.viewModel = ViewModel(this.application)
-        var n : String? = null
-        n.let {
-            Log.e(TAG, "onCreate: $n")
+        this.dialog = PopUpWeatherInfoDialog()
+        if(savedInstanceState != null){
+            with(savedInstanceState){
+                Log.e(TAG, "onCreate dialog state1: ${getBoolean("showDialog")}")
+                Log.e(TAG, "onCreate dialog state2: ${getParcelable<CityWheatherInfo>("cityDialog")}")
+                Log.e(TAG, "onCreate dialog state3: ${getParcelableArrayList<CityWheatherInfo>(saved)}")
+                viewModel.list = getParcelableArrayList("WeatherList")?: arrayListOf()
+                viewModel.citiesWheatherList.value = getParcelableArrayList("WeatherList")
+                cityInfo = getParcelable<CityWheatherInfo>("cityDialog")?: CityWheatherInfo()
+            }
+        }else{
+            this.viewModel.setUp(applicationContext)
         }
+        this.binding = ActivitySearchPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
         this.binding.recyclerView.layoutManager = LinearLayoutManager(this)
         this.binding.searchBar.setOnQueryTextListener(this)
-        this.viewModel.setUp(applicationContext)
-        this.viewModel.citiesWheatherList.observe(this){
-            //Log.e(TAG, "TEST RUN onCreate: List Changed Added: ${it}")
-            recyclerViewAdapter.notifyDataSetChanged()
-            Log.e(TAG, "SIZE onCreate: ${this.viewModel.citiesWheatherList.value?.size}")
-        }
+
         recyclerViewAdapter = RecyclerViewAdapter(this,this.viewModel,this)
         this.binding.recyclerView.adapter = recyclerViewAdapter
+        this.viewModel.citiesWheatherList.observe(this){
+            recyclerViewAdapter.notifyDataSetChanged()
+            Log.e(TAG, "SIZE onCreate: ${this.viewModel.citiesWheatherList.value?.size}")
+            Log.e(TAG, "VALUE onCreate: ${this.viewModel.citiesWheatherList.value}")
+        }
         this.binding.recyclerView.addItemDecoration(MarginItemDecoration(40))
         getLocation()
         swipeGesture()
         this.swipeHelper.attachToRecyclerView(this.binding.recyclerView)
+
     }
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.e(TAG, "onSaveInstanceState: saved instance been called")
+        outState.putParcelableArrayList(saved,this.viewModel.citiesWheatherList.value)
+        outState.putParcelable("cityDialog",cityInfo)
+        super.onSaveInstanceState(outState)
+    }
+
     fun swipeGesture(){
         this.swipeHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT){
             override fun onMove(
@@ -68,8 +88,8 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
-                Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
+                //Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
+                //Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
                 try {
                     SharedPrefrencesManager.removeCity("Cities",viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
                     viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
@@ -88,46 +108,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         })
     }
 
-    override fun onBackPressed() {
-        Log.e(TAG, "onBackPressed: Back Been Pressed", )
-        super.onBackPressed()
-    }
-
-    override fun onDestroy() {
-        Log.e(TAG, "onDestroy: Search Page Destroyed", )
-        super.onDestroy()
-    }
-
-    override fun onStart() {
-        Log.e(TAG, "onStart: Search Page Started", )
-        super.onStart()
-    }
-
-    override fun onResume() {
-        Log.e(TAG, "onResume: Search Page Resumed", )
-        super.onResume()
-    }
-
-    override fun onRestart() {
-        Log.e(TAG, "onRestart: Search Page Restarted", )
-        super.onRestart()
-    }
-
-    override fun finish() {
-        Log.e(TAG, "finish: Activity Finished", )
-        super.finish()
-    }
-
-    override fun onStop() {
-        Log.e(TAG, "onStop: Search Page Stopped", )
-        super.onStop()
-    }
-
-    override fun onPause() {
-        Log.e(TAG, "onPause: Search Page onPaused", )
-        super.onPause()
-    }
-
     override fun onQueryTextChange(newText: String): Boolean {
         Log.e(TAG, "onQueryTextChange: $newText", )
         return false
@@ -144,23 +124,18 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 Log.e(TAG, "onCreate: $query", )
             }
         }
-        Log.e(TAG, "onQueryTextSubmit: $query")
+        //Log.e(TAG, "onQueryTextSubmit: $query")
         viewModel.getWeatherAsync(query).invokeOnCompletion {
-            val myDialog = PopUpWeatherInfoDialog(this.viewModel.cityWheatherInfo,this,this.viewModel)
-            myDialog.show(this.supportFragmentManager,"MyDialog")
+            cityInfo = this.viewModel.cityWheatherInfo
+            //val dialog = PopUpWeatherInfoDialog()
+            dialog.show(this.supportFragmentManager,"MyDialog")
+            Log.e(TAG, "onQueryTextSubmit: ${this.viewModel.citiesWheatherList.value}", )
         }
         return false
     }
 
     override fun onClickListener(cityWheatherInfo: CityWheatherInfo,position: Int) {
-        //Log.e(TAG, "onClickListener: City Clicked")
-        //Log.e(TAG, "onClickListener: $cityWheatherInfo +\nPosition: $position")
-        var bundle = Bundle()
-        var l = this.viewModel.citiesWheatherList.value
-        //Log.e(TAG, "onClickListener Value: $l", )
-        bundle.putParcelableArrayList("List",this.viewModel.citiesWheatherList.value)
         val intent = Intent(this, MainActivity::class.java)
-        //intent.putExtra("CitiesList",bundle)
         intent.putParcelableArrayListExtra("CitiesList",this.viewModel.citiesWheatherList.value)
         intent.putExtra("ItemSelectedPosition",position)
         // TODO: HAVE THE GET POSITON BE SEPERATE FROM THE ONCLICKLISTENER
@@ -168,7 +143,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     }
 
     fun getLocation(){
-        var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager// provides access to the system location services and these services
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager// provides access to the system location services and these services
         // allow applications to obtain periodic updates of the device's geographical location
         var cirtiria = Criteria() // indicating the application criteria for selecting a location provider.
         // Providers may be ordered according to accuracy, power usage, ability to report altitude, speed, bearing, and monetary cost.
@@ -191,7 +166,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         else{
             // When permission is granted
             //var location = provider?.let { locationManager.getLastKnownLocation(it) }
-
             // Requesting location updates is what triggers onLocationChanged
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)
             //var location = provider?.let { locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,5f,this)}
@@ -262,18 +236,17 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             var city = getCity(it)
             city?.let{
                 this.viewModel.getWeatherAsync(it).invokeOnCompletion {
+                    // TODO: MOVE IT TO VIEWMODEL
                     SharedPrefrencesManager.writeCurrentCity(this.viewModel.CURRENT_CITY_KEY,city)
-                    this.viewModel.addCity()
+                    SharedPrefrencesManager.writeCitiesList(this.viewModel.CITIES_LIST_KEY,city)
+                    this.viewModel.addCities()
+                    Log.e(TAG, "onRequestPermissionsResult: ${SharedPrefrencesManager.readCities(this.viewModel.CITIES_LIST_KEY)}", )
                 }
                 return@onRequestPermissionsResult
             }
             Toast.makeText(this.baseContext,"Couldn't Fetch Current Location",Toast.LENGTH_LONG).show()
         }
     }
-
-//    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-//        super.onStatusChanged(provider, status, extras) // TODO: search ip this method
-//    }
 
     fun getCity(location: Location) : String?{
         var city : String? = null
@@ -303,10 +276,51 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         Log.e(TAG, "onLocationChanged: Current City Hasn't Changed")
     }
 
-    override fun onProviderEnabled(provider: String) {
-        super.onProviderEnabled(provider)
-        // TODO: search ip this method
+    override fun onBackPressed() {
+        Log.e(TAG, "onBackPressed: Back Been Pressed", )
+        super.onBackPressed()
     }
+
+    override fun onDestroy() {
+        // Because location manager has mcontext field that reference to activity
+        // it needs remove the updates when destroyed so that memeory wouldn't be leaked
+        // most memory leaks are because of context reference of activities that are destroyed
+        locationManager.removeUpdates(this)
+        Log.e(TAG, "onDestroy: Search Page Destroyed", )
+        //if (dialog.isVisible) dialog.dismiss()
+        super.onDestroy()
+    }
+
+    override fun onStart() {
+        Log.e(TAG, "onStart: Search Page Started", )
+        super.onStart()
+    }
+
+    override fun onResume() {
+        Log.e(TAG, "onResume: Search Page Resumed", )
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        Log.e(TAG, "onRestart: Search Page Restarted", )
+        super.onRestart()
+    }
+
+    override fun finish() {
+        Log.e(TAG, "finish: Activity Finished", )
+        super.finish()
+    }
+
+    override fun onStop() {
+        Log.e(TAG, "onStop: Search Page Stopped", )
+        super.onStop()
+    }
+
+    override fun onPause() {
+        Log.e(TAG, "onPause: Search Page onPaused", )
+        super.onPause()
+    }
+
 }
 
 

@@ -37,8 +37,8 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     var currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
     var citiesWheatherList: MutableLiveData<ArrayList<CityWheatherInfo>>
     var cityWheatherInfo: CityWheatherInfo
-
     init {
+        Log.e(TAG, "ViewModel Start")
         this.citiesWheatherList = MutableLiveData<ArrayList<CityWheatherInfo>>()
         cityWheatherInfo = CityWheatherInfo()
     }
@@ -190,22 +190,31 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
         loadWeather(city)
     }
 
+    // IO for is used for databse or remote servers
+    // DEFAULT is used for tasks with high CPU usage
+    // MAIN is used for UI updates
+
+
     fun setUp(context: Context) = viewModelScope.launch(Dispatchers.IO) {
         SharedPrefrencesManager.init(context)
-        Log.e(TAG, "setUp: ${SharedPrefrencesManager.readCities(CITIES_LIST_KEY)}", )
+        Log.e(TAG, "setUp: ${SharedPrefrencesManager.readCities(CITIES_LIST_KEY)}")
+        val threadName = Thread.currentThread().name
         SharedPrefrencesManager.readCities(CITIES_LIST_KEY).forEach { city ->
             Log.e(TAG, "TEST RUN onCreate: City Name: $city")
-            //Log.e(TAG, "TEST RUN setUp: ${citiesWheatherList.value!!.size.toString()}", )
-//            getWeather(city).invokeOnCompletion {
-//                addCity()
-//            }
+            Log.e(TAG, "setUp: $threadName")
             loadWeather(city)
-            addCity()
+            addCities()
         }
     }
 
-    fun addCity(){
+    fun addcity(cityinfo : CityWheatherInfo){
+        list.add(cityinfo)
+        citiesWheatherList.postValue(list)
+    }
+
+    fun addCities(){
         var isDuplicate = false
+        Log.e(TAG, "addCities: ${citiesWheatherList.value}", )
         citiesWheatherList.value?.forEach {
             if(it.cityName == cityWheatherInfo.cityName){
                 isDuplicate = true
@@ -237,7 +246,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
             SharedPrefrencesManager.writeCurrentCity("currentCity",city)
             Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
             SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-            addCity()
+            addCities()
         }else{
             //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
             if(citiesWheatherList.value?.get(0)?.cityName!! == SharedPrefrencesManager.readCurrentCity("currentCity")){
@@ -248,21 +257,21 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
                 //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
                 SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
                 citiesWheatherList.value?.removeFirst()
-                addCity()
+                addCities()
             }else{
                 //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
                 //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
                 SharedPrefrencesManager.writeCurrentCity("currentCity",city)
                 //Log.e(TAG, "onLocationChanged Current City After change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
                 SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-                addCity()
+                addCities()
             }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        Log.e(TAG, "onCleared: ")
+        Log.e(TAG, "onCleared Search Page: View Model Cleared")
     }
 }
 
