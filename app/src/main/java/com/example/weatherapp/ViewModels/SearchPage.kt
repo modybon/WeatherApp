@@ -124,11 +124,18 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             }
         }
         //Log.e(TAG, "onQueryTextSubmit: $query")
-        viewModel.getWeatherAsync(query).invokeOnCompletion {
-            cityInfo = this.viewModel.cityWheatherInfo
-            //val dialog = PopUpWeatherInfoDialog()
-            dialog.show(this.supportFragmentManager,"MyDialog")
-            Log.e(TAG, "onQueryTextSubmit: ${this.viewModel.citiesWheatherList.value}", )
+        if(this.viewModel.cityAlreadyAdded(query)) {
+            Toast.makeText(this,"${query.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.ROOT) 
+                else it.toString()
+            }} Already in the list",Toast.LENGTH_LONG).show()
+        }else{
+            viewModel.getWeatherAsync(query).invokeOnCompletion {
+                cityInfo = this.viewModel.cityWheatherInfo
+                //val dialog = PopUpWeatherInfoDialog()
+                dialog.show(this.supportFragmentManager,"MyDialog")
+                Log.e(TAG, "onQueryTextSubmit: ${this.viewModel.citiesWheatherList.value}", )
+            }
         }
         return false
     }

@@ -204,8 +204,30 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
             Log.e(TAG, "TEST RUN onCreate: City Name: $city")
             Log.e(TAG, "setUp: $threadName")
             loadWeather(city)
-            addCities()
+            addCity()
         }
+    }
+
+    private fun addCity(){
+        if (cityWheatherInfo.cityName == getCurrentCity()) {
+            list.add(0, cityWheatherInfo)
+        } else {
+            list.add(list.size, cityWheatherInfo)
+        }
+        //Log.e(TAG, "addCity: ${list.size}")
+        citiesWheatherList.postValue(list) // notifies observes that data has changed
+        //citiesWheatherList.value = list // Cannot use setValue because its on a background thread
+        cityWheatherInfo = CityWheatherInfo()
+    }
+
+    fun cityAlreadyAdded(city: String) : Boolean{
+        Log.e(TAG, "addCities: ${citiesWheatherList.value}", )
+        citiesWheatherList.value?.forEach {
+            if(it.cityName.toString().lowercase() == city.lowercase()){
+                return true
+            }
+        }
+        return false
     }
 
     fun addCities(){
