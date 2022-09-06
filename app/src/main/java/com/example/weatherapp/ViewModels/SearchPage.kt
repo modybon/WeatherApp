@@ -244,7 +244,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 this.searchViewModel.getWeatherAsync(it).invokeOnCompletion {
                     searchViewModel.cityWheatherInfo.cityName?.let { cityName ->
                         searchViewModel.writeCurrentCity(cityName)
-                        searchViewModel.writeCitiesList(cityName)
+                        searchViewModel.addCityToCitiesList(cityName)
                     }
                     this.searchViewModel.addCity()
                 }

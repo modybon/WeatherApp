@@ -20,7 +20,7 @@ object SharedPrefrencesManager {
         }
     }
 
-    fun writeCitiesList(key : String?, value: String?){
+    fun addCityToCitiesList(key : String?, value: String?){
         val setOfCitiesNames : Set<String> = readCities(key)
         apply { sharedPreferences!!.edit().putStringSet(key,setOfCitiesNames + value).apply() }
     }

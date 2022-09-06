@@ -200,12 +200,13 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
     fun setUp(context: Context) = viewModelScope.launch(Dispatchers.IO) {
         Log.e(TAG, "setUp1: ${getSavedCities()}")
         val threadName = Thread.currentThread().name
+
         getSavedCities().forEach { city ->
-            Log.e(TAG, "TEST RUN onCreate: City Name: $city")
-            Log.e(TAG, "setUp: $threadName")
-            loadWeather(city)
-            addCity()
-        }
+                Log.e(TAG, "TEST RUN onCreate: City Name: $city")
+                Log.e(TAG, "setUp: $threadName")
+                loadWeather(city)
+                addCity()
+            }
     }
 
     fun addCity(){
@@ -239,39 +240,13 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
         // TODO: REFACTOR THIS METHOD
         Log.e(TAG, "currentCityChanged city: $city", )
         loadWeather(city)
-        if((citiesWheatherList.value.isNullOrEmpty())){
-            Log.e(TAG, "currentCityChanged cityWheatherInfo: ${cityWheatherInfo.cityName}", )
-            cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-            Log.e(TAG, "currentCityChanged: $currentCity", )
-            //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-            cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-            //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-            //currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
+        removeCity(getCurrentCity())
+        citiesWheatherList.value?.removeFirst()
+        cityWheatherInfo.cityName?.let {
+            Log.e(TAG, "currentCityChanged: $it")
+            writeCurrentCity(it)
+            addCityToCitiesList(city)
             addCity()
-        }else{
-            //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
-            if(citiesWheatherList.value?.get(0)?.cityName!! == getCurrentCity()){
-                SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,citiesWheatherList.value?.get(0)?.cityName!!)
-                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
-                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
-                Log.e(TAG, "currentCityChanged: $currentCity", )
-                cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-                //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-                cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-                //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-                citiesWheatherList.value?.removeFirst()
-                addCity()
-            }else{
-                //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
-                //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
-                //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-                Log.e(TAG, "currentCityChanged: $currentCity", )
-                cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-                //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-                cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-                //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-                addCity()
-            }
         }
     }
 
@@ -288,14 +263,50 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
         SharedPrefrencesManager.writeCurrentCity(CURRENT_CITY_KEY,city)
         currentCity = city
     }
-    fun writeCitiesList(city : String) = viewModelScope.launch(Dispatchers.IO) {
-        SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+    fun addCityToCitiesList(city : String){
+        SharedPrefrencesManager.addCityToCitiesList(CITIES_LIST_KEY,city)
     }
     fun getCurrentCity(): String{
         Log.e(TAG, "getCurrentCity: $currentCity", )
         return currentCity
     }
-    private fun getSavedCities() : Set<String>{
+    fun getSavedCities() : Set<String>{
         return SharedPrefrencesManager.readCities(CITIES_LIST_KEY)
     }
 }
+
+
+//if((citiesWheatherList.value.isNullOrEmpty())){
+//    Log.e(TAG, "currentCityChanged cityWheatherInfo: ${cityWheatherInfo.cityName}", )
+//    cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
+//    Log.e(TAG, "currentCityChanged: $currentCity", )
+//    //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//    cityWheatherInfo.cityName?.let { writeCitiesList(it) }
+//    //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//    //currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
+//    addCity()
+//}else{
+//    //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
+//    if(citiesWheatherList.value?.get(0)?.cityName!! == getCurrentCity()){
+//        SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,citiesWheatherList.value?.get(0)?.cityName!!)
+//        //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+//        //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//        Log.e(TAG, "currentCityChanged: $currentCity", )
+//        cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
+//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//        cityWheatherInfo.cityName?.let { writeCitiesList(it) }
+//        //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//        citiesWheatherList.value?.removeFirst()
+//        addCity()
+//    }else{
+//        //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
+//        //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
+//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//        Log.e(TAG, "currentCityChanged: $currentCity", )
+//        cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
+//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
+//        cityWheatherInfo.cityName?.let { writeCitiesList(it) }
+//        //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
+//        addCity()
+//    }
+//}
