@@ -26,8 +26,8 @@ created by
  * Studnet ID: 991563114
  * on ${2020/3/3} */
 
-class ViewModel (application: Application) : AndroidViewModel(application) {
-    private val TAG = this@ViewModel.toString()
+class SearchViewModel (application: Application) : AndroidViewModel(application) {
+    private val TAG = this@SearchViewModel.toString()
     private val key: String = "fd6b5b197e705ecbec520c688fc640bb"
     private var metrics: String = "metric"
     var list: ArrayList<CityWheatherInfo> = arrayListOf<CityWheatherInfo>()
@@ -255,6 +255,7 @@ class ViewModel (application: Application) : AndroidViewModel(application) {
     fun currentCityChanged(city: String) = viewModelScope.launch(Dispatchers.IO){
         // TODO : TRY TO USE LET BECAUSE The code inside the let expression is executed only when the property is not null
         // TODO: DIFFRENCE BETWEEN also and let is that also would return the object while let you would need to specify the return or change the value
+        // TODO: REFACTOR THIS METHOD
         loadWeather(city)
         if((citiesWheatherList.value.isNullOrEmpty())){
             writeCurrentCity(city)

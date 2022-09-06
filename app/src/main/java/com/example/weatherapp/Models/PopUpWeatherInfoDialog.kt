@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
 import com.example.weatherapp.ViewModels.SearchPage
-import com.example.weatherapp.ViewModels.ViewModel
 import com.example.weatherapp.databinding.FragmentWeatherPageBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
 import java.lang.IllegalStateException
@@ -25,18 +24,18 @@ class PopUpWeatherInfoDialog: DialogFragment() {
         //retainInstance = true
         return activity.let {
             var activity = getActivity() as SearchPage
-            activity.viewModel.cityWheatherInfo = activity.cityInfo
+            activity.searchViewModel.cityWheatherInfo = activity.cityInfo
             //Log.e(TAG, "onCreateDialogTest: ${activity.viewModel.cityWheatherInfo}")
             val builder = AlertDialog.Builder(it)
             builder.setPositiveButton("Add") { dialog, id ->
-                activity.viewModel.addCities()
+                activity.searchViewModel.addCities()
                 SharedPrefrencesManager.writeCitiesList("Cities", activity.cityInfo.cityName)
-                Log.e(TAG, "onCreateDialog: ${activity.viewModel.citiesWheatherList.value}")
+                Log.e(TAG, "onCreateDialog: ${activity.searchViewModel.citiesWheatherList.value}")
                 // TODO: TRY INTERFACE TO DO ADD THE CITYINFO
                 dialog.dismiss()
             }
             builder.setNegativeButton("Cancel") {dialog, id->
-                activity.viewModel.cityWheatherInfo = CityWheatherInfo()
+                activity.searchViewModel.cityWheatherInfo = CityWheatherInfo()
                 activity.cityInfo = CityWheatherInfo()
                 dialog.dismiss()
             }

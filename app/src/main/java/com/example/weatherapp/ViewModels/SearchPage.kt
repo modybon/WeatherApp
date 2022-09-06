@@ -26,7 +26,7 @@ import java.util.*
 class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
     private val TAG = this@SearchPage.toString()
     lateinit var binding : ActivitySearchPageBinding
-    lateinit var viewModel: ViewModel
+    lateinit var searchViewModel: SearchViewModel
     lateinit var recyclerViewAdapter: RecyclerViewAdapter
     lateinit var swipeHelper: ItemTouchHelper
     lateinit var locationManager: LocationManager
@@ -36,31 +36,31 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState) // Always call the super class first
         Log.e(TAG, "onCreate: Search Page onCreate", )
-        this.viewModel = ViewModel(this.application)
+        this.searchViewModel = SearchViewModel(this.application)
         this.dialog = PopUpWeatherInfoDialog()
         if(savedInstanceState != null){
             with(savedInstanceState){
                 Log.e(TAG, "onCreate dialog state1: ${getBoolean("showDialog")}")
                 Log.e(TAG, "onCreate dialog state2: ${getParcelable<CityWheatherInfo>("cityDialog")}")
                 Log.e(TAG, "onCreate dialog state3: ${getParcelableArrayList<CityWheatherInfo>(saved)}")
-                viewModel.list = getParcelableArrayList("WeatherList")?: arrayListOf()
-                viewModel.citiesWheatherList.value = getParcelableArrayList("WeatherList")
+                searchViewModel.list = getParcelableArrayList("WeatherList")?: arrayListOf()
+                searchViewModel.citiesWheatherList.value = getParcelableArrayList("WeatherList")
                 cityInfo = getParcelable("cityDialog")?: CityWheatherInfo()
             }
         }else{
-            this.viewModel.setUp(applicationContext)
+            this.searchViewModel.setUp(applicationContext)
         }
         this.binding = ActivitySearchPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
         this.binding.recyclerView.layoutManager = LinearLayoutManager(this)
         this.binding.searchBar.setOnQueryTextListener(this)
 
-        recyclerViewAdapter = RecyclerViewAdapter(this,this.viewModel,this)
+        recyclerViewAdapter = RecyclerViewAdapter(this,this.searchViewModel,this)
         this.binding.recyclerView.adapter = recyclerViewAdapter
-        this.viewModel.citiesWheatherList.observe(this){
+        this.searchViewModel.citiesWheatherList.observe(this){
             recyclerViewAdapter.notifyDataSetChanged()
-            Log.e(TAG, "SIZE onCreate: ${this.viewModel.citiesWheatherList.value?.size}")
-            Log.e(TAG, "VALUE onCreate: ${this.viewModel.citiesWheatherList.value}")
+            Log.e(TAG, "SIZE onCreate: ${this.searchViewModel.citiesWheatherList.value?.size}")
+            Log.e(TAG, "VALUE onCreate: ${this.searchViewModel.citiesWheatherList.value}")
         }
         this.binding.recyclerView.addItemDecoration(MarginItemDecoration(40))
         getLocation()
@@ -70,7 +70,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     }
     override fun onSaveInstanceState(outState: Bundle) {
         Log.e(TAG, "onSaveInstanceState: saved instance been called")
-        outState.putParcelableArrayList(saved,this.viewModel.citiesWheatherList.value)
+        outState.putParcelableArrayList(saved,this.searchViewModel.citiesWheatherList.value)
         outState.putParcelable("cityDialog",cityInfo)
         super.onSaveInstanceState(outState)
     }
@@ -89,9 +89,10 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 //Log.e(TAG, "onSwiped: ${viewHolder.layoutPosition}")
                 //Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
+                // TODO: FIX THE USE OF !!
                 try {
-                    viewModel.removeCity(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
-                    viewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
+                    searchViewModel.removeCity(searchViewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
+                    searchViewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
                     recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
                 }catch (e : Exception){
                     Log.e(TAG, "onSwiped Error: ${e.message}", )
@@ -99,9 +100,9 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             }
 
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-                Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value?.size}", )
-                Log.e(TAG, "getSwipeDirs: ${viewModel.citiesWheatherList.value}", )
-                if(viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == viewModel.getCurrentCity()) return 0
+                Log.e(TAG, "getSwipeDirs: ${searchViewModel.citiesWheatherList.value?.size}", )
+                Log.e(TAG, "getSwipeDirs: ${searchViewModel.citiesWheatherList.value}", )
+                if(searchViewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName == searchViewModel.getCurrentCity()) return 0
                 return super.getSwipeDirs(recyclerView, viewHolder)
             }
         })
@@ -117,24 +118,21 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         return super.onSearchRequested()
     }
     override fun onQueryTextSubmit(query: String): Boolean {
-        // task HERE
         if(Intent.ACTION_SEARCH == intent.action){
             intent.getStringExtra(SearchManager.QUERY).also { query->
                 Log.e(TAG, "onCreate: $query", )
             }
         }
-        //Log.e(TAG, "onQueryTextSubmit: $query")
-        if(this.viewModel.cityAlreadyAdded(query)) {
+        if(this.searchViewModel.cityAlreadyAdded(query)) {
             Toast.makeText(this,"${query.replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(Locale.ROOT) 
                 else it.toString()
             }} Already in the list",Toast.LENGTH_LONG).show()
         }else{
-            viewModel.getWeatherAsync(query).invokeOnCompletion {
-                cityInfo = this.viewModel.cityWheatherInfo
-                //val dialog = PopUpWeatherInfoDialog()
+            searchViewModel.getWeatherAsync(query).invokeOnCompletion {
+                cityInfo = this.searchViewModel.cityWheatherInfo
                 dialog.show(this.supportFragmentManager,"MyDialog")
-                Log.e(TAG, "onQueryTextSubmit: ${this.viewModel.citiesWheatherList.value}", )
+                Log.e(TAG, "onQueryTextSubmit: ${this.searchViewModel.citiesWheatherList.value}", )
             }
         }
         return false
@@ -142,7 +140,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
 
     override fun onClickListener(cityWheatherInfo: CityWheatherInfo,position: Int) {
         val intent = Intent(this, MainActivity::class.java)
-        intent.putParcelableArrayListExtra("CitiesList",this.viewModel.citiesWheatherList.value)
+        intent.putParcelableArrayListExtra("CitiesList",this.searchViewModel.citiesWheatherList.value)
         intent.putExtra("ItemSelectedPosition",position)
         // TODO: HAVE THE GET POSITON BE SEPERATE FROM THE ONCLICKLISTENER
         startActivity(intent)
@@ -241,11 +239,10 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         location?.let {
             var city = getCity(it)
             city?.let{
-                this.viewModel.getWeatherAsync(it).invokeOnCompletion {
-                    // TODO: MOVE IT TO VIEWMODEL
-                    viewModel.writeCurrentCity(city)
-                    viewModel.writeCitiesList(city)
-                    this.viewModel.addCities()
+                this.searchViewModel.getWeatherAsync(it).invokeOnCompletion {
+                    searchViewModel.writeCurrentCity(city)
+                    searchViewModel.writeCitiesList(city)
+                    this.searchViewModel.addCities()
                 }
                 return@onRequestPermissionsResult
             }
@@ -270,12 +267,11 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     }
     override fun onLocationChanged(location: Location) {
         Log.e(TAG, "onLocationChanged new Location: $location")
-        var city = getCity(location) ?: viewModel.getCurrentCity()
+        var city = getCity(location) ?: searchViewModel.getCurrentCity()
         Log.e(TAG, "onLocationChanged: $city")
-        if(city != viewModel.getCurrentCity()){
+        if(city != searchViewModel.getCurrentCity()){
             Log.e(TAG, "onLocationChanged New City: $city")
-            // TODO: CHANGE CURRENT CITY
-            this.viewModel.currentCityChanged(city)
+            this.searchViewModel.currentCityChanged(city)
             return
         }
         Log.e(TAG, "onLocationChanged: Current City Hasn't Changed")
@@ -292,7 +288,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         // most memory leaks are because of context reference of activities that are destroyed
         locationManager.removeUpdates(this)
         Log.e(TAG, "onDestroy: Search Page Destroyed", )
-        //if (dialog.isVisible) dialog.dismiss()
         super.onDestroy()
     }
 

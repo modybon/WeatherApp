@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.R
-import com.example.weatherapp.ViewModels.ViewModel
+import com.example.weatherapp.ViewModels.SearchViewModel
 import com.example.weatherapp.databinding.MiniWheatherInfoLayoutBinding
 import com.example.weatherapp.managers.SharedPrefrencesManager
 
@@ -18,7 +18,7 @@ created by
 
 class RecyclerViewAdapter(
     private val context: Context,
-    private val viewModel: ViewModel,
+    private val searchViewModel: SearchViewModel,
     private val clickListener: WeatherInfoDialogInterface
     ): RecyclerView.Adapter<RecyclerViewAdapter.WeatherViewHolder>() {
 
@@ -57,11 +57,11 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
-        this.viewModel.citiesWheatherList.value?.let { holder.bind(it.get(position),this.clickListener,position) }
+        this.searchViewModel.citiesWheatherList.value?.let { holder.bind(it.get(position),this.clickListener,position) }
     }
 
     override fun getItemCount(): Int {
-        return this.viewModel.citiesWheatherList.value?.size ?: 0
+        return this.searchViewModel.citiesWheatherList.value?.size ?: 0
     }
 
 }
