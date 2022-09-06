@@ -28,7 +28,7 @@ class PopUpWeatherInfoDialog: DialogFragment() {
             //Log.e(TAG, "onCreateDialogTest: ${activity.viewModel.cityWheatherInfo}")
             val builder = AlertDialog.Builder(it)
             builder.setPositiveButton("Add") { dialog, id ->
-                activity.searchViewModel.addCities()
+                activity.searchViewModel.addCity()
                 SharedPrefrencesManager.writeCitiesList("Cities", activity.cityInfo.cityName)
                 Log.e(TAG, "onCreateDialog: ${activity.searchViewModel.citiesWheatherList.value}")
                 // TODO: TRY INTERFACE TO DO ADD THE CITYINFO

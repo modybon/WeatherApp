@@ -91,6 +91,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 //Log.e(TAG, "onSwiped City: ${viewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}")
                 // TODO: FIX THE USE OF !!
                 try {
+                    Log.e(TAG, "onSwiped: ${searchViewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!}", )
                     searchViewModel.removeCity(searchViewModel.citiesWheatherList.value?.get(viewHolder.adapterPosition)?.cityName!!)
                     searchViewModel.citiesWheatherList.value!!.removeAt(viewHolder.adapterPosition)
                     recyclerViewAdapter.notifyItemRemoved(viewHolder.adapterPosition)
@@ -242,7 +243,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 this.searchViewModel.getWeatherAsync(it).invokeOnCompletion {
                     searchViewModel.writeCurrentCity(city)
                     searchViewModel.writeCitiesList(city)
-                    this.searchViewModel.addCities()
+                    this.searchViewModel.addCity()
                 }
                 return@onRequestPermissionsResult
             }
