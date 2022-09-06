@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
@@ -26,7 +27,7 @@ import java.util.*
 class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
     private val TAG = this@SearchPage.toString()
     lateinit var binding : ActivitySearchPageBinding
-    lateinit var searchViewModel: SearchViewModel
+    val searchViewModel: SearchViewModel by viewModels()
     lateinit var recyclerViewAdapter: RecyclerViewAdapter
     lateinit var swipeHelper: ItemTouchHelper
     lateinit var locationManager: LocationManager
@@ -36,7 +37,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState) // Always call the super class first
         Log.e(TAG, "onCreate: Search Page onCreate", )
-        this.searchViewModel = SearchViewModel(this.application)
+        //this.searchViewModel = SearchViewModel(this.application)
         this.dialog = PopUpWeatherInfoDialog()
         if(savedInstanceState != null){
             with(savedInstanceState){
@@ -241,8 +242,10 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
             var city = getCity(it)
             city?.let{
                 this.searchViewModel.getWeatherAsync(it).invokeOnCompletion {
-                    searchViewModel.writeCurrentCity(city)
-                    searchViewModel.writeCitiesList(city)
+                    searchViewModel.cityWheatherInfo.cityName?.let { cityName ->
+                        searchViewModel.writeCurrentCity(cityName)
+                        searchViewModel.writeCitiesList(cityName)
+                    }
                     this.searchViewModel.addCity()
                 }
                 return@onRequestPermissionsResult

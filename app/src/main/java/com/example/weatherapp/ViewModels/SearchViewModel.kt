@@ -210,8 +210,11 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
 
     fun addCity(){
         if (cityWheatherInfo.cityName == getCurrentCity()) {
+            Log.e(TAG, "addCity: Add Current city to top of list", )
             list.add(0, cityWheatherInfo)
         } else {
+            Log.e(TAG, "addCity City: ${cityWheatherInfo.cityName}", )
+            Log.e(TAG, "addCity: Add city to list", )
             list.add(list.size, cityWheatherInfo)
         }
         //Log.e(TAG, "addCity: ${list.size}")
@@ -281,7 +284,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
     fun removeCity(city: String) = viewModelScope.launch(Dispatchers.IO) {
         SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,city)
     }
-    fun writeCurrentCity(city:String) = viewModelScope.launch(Dispatchers.IO) {
+    fun writeCurrentCity(city:String){
         SharedPrefrencesManager.writeCurrentCity(CURRENT_CITY_KEY,city)
         currentCity = city
     }
