@@ -9,6 +9,8 @@ import com.example.weatherapp.Models.ViewPagerAdapter
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(){
     private val TAG = this@MainActivity.toString()
@@ -53,6 +55,7 @@ class MainActivity : AppCompatActivity(){
     }
     override fun onDestroy() {
         Log.e(TAG, "onDestroy: Main Activity Destroyed")
+        this.binding.searchPageBtn.setOnClickListener(null)
         super.onDestroy()
     }
 

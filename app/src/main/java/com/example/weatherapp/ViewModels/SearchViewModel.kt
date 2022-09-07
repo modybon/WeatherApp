@@ -197,7 +197,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
     // MAIN is used for UI updates
 
 
-    fun setUp(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+    fun setUp() = viewModelScope.launch(Dispatchers.IO) {
         Log.e(TAG, "setUp1: ${getSavedCities()}")
         val threadName = Thread.currentThread().name
 
@@ -234,7 +234,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
         return false
     }
     
-    fun currentCityChanged(city: String) = viewModelScope.launch(Dispatchers.IO){
+    fun currentCityChanged(city: String) = viewModelScope.launch(Dispatchers.Default){
         // TODO : TRY TO USE LET BECAUSE The code inside the let expression is executed only when the property is not null
         // TODO: DIFFRENCE BETWEEN also and let is that also would return the object while let you would need to specify the return or change the value
         // TODO: REFACTOR THIS METHOD
@@ -243,7 +243,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
         removeCity(getCurrentCity())
         citiesWheatherList.value?.removeFirst()
         cityWheatherInfo.cityName?.let {
-            Log.e(TAG, "currentCityChanged: $it")
+            Log.e(TAG, "currentCityChanged 2: $it")
             writeCurrentCity(it)
             addCityToCitiesList(city)
             addCity()
@@ -260,6 +260,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
         SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,city)
     }
     fun writeCurrentCity(city:String){
+        Log.e(TAG, "writeCurrentCity: $city", )
         SharedPrefrencesManager.writeCurrentCity(CURRENT_CITY_KEY,city)
         currentCity = city
     }

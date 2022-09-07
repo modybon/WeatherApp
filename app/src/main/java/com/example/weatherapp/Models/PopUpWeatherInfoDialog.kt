@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.example.weatherapp.ViewModels.SearchViewModel
@@ -21,12 +22,26 @@ class PopUpWeatherInfoDialog: DialogFragment() {
     private val TAG = this@PopUpWeatherInfoDialog.toString()
     private lateinit var binding : FragmentWeatherPageBinding
     private val viewModel : SearchViewModel by activityViewModels()
+    private lateinit var cityinfo : CityWheatherInfo
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable("cityInfo",cityinfo)
+        super.onSaveInstanceState(outState)
+    }
+    // There's a leak that gets cause because of TextView its a bug in the system they fixed it in android 5.1
+    override fun onDestroyView() {
+        super.onDestroyView()
+    }
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        var cityinfo = viewModel.cityWheatherInfo
         return activity.let {
             val builder = AlertDialog.Builder(it)
+            if(savedInstanceState!=null){
+                cityinfo = savedInstanceState.getParcelable<CityWheatherInfo>("cityInfo")?:CityWheatherInfo()
+            }else {
+                cityinfo = viewModel.cityWheatherInfo
+            }
             builder.setPositiveButton("Add") { dialog, id ->
                 viewModel.addCity()
+                Log.e(TAG, "onCreateDialog: ${cityinfo.cityName}", )
                 viewModel.addCityToCitiesList(cityinfo.cityName!!)
                 Log.e(TAG, "onCreateDialog: ${ viewModel.citiesWheatherList.value}")
                 Log.e(TAG, "onCreateDialog cities: ${viewModel.getSavedCities()}", )
@@ -37,6 +52,7 @@ class PopUpWeatherInfoDialog: DialogFragment() {
                 viewModel.cityWheatherInfo = CityWheatherInfo()
                 dialog.dismiss()
             }
+
             this.binding = FragmentWeatherPageBinding.inflate(layoutInflater)
             builder.setView(this.binding.root)
             this.binding.cityNameTv.setText(cityinfo.cityName)

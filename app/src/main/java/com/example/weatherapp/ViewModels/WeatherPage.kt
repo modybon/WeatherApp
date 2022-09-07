@@ -57,7 +57,7 @@ class WeatherPage : Fragment() {
         this.binding.feelsLikeTextView.setText(String.format("%.0f",cityInfo.feelsLike) + '°')
         this.binding.highTempTv.setText("H:${String.format("%.0f",cityInfo.highTemp) +'°'}")
         this.binding.lowTempTv.setText("L:${String.format("%.0f",cityInfo.lowTemp) + '°'}")
-        this.binding.humidityTv.setText(cityInfo.toString() + '%')
+        this.binding.humidityTv.setText(cityInfo.humidity.toString() + '%')
         this.binding.pressureTextView.setText(cityInfo.pressure.toString() + " hPa")
         this.binding.visibilityTv.setText(cityInfo.visibility.toString() + " Km")
         this.binding.windTextView.setText(cityInfo.windSpeed.toString())

@@ -32,13 +32,13 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
     lateinit var swipeHelper: ItemTouchHelper
     lateinit var locationManager: LocationManager
     private val saved = "WeatherList"
-    private lateinit var dialog : PopUpWeatherInfoDialog
+    //private lateinit var dialog : PopUpWeatherInfoDialog
     var cityInfo : CityWheatherInfo = CityWheatherInfo()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState) // Always call the super class first
         Log.e(TAG, "onCreate: Search Page onCreate", )
         //this.searchViewModel = SearchViewModel(this.application)
-        this.dialog = PopUpWeatherInfoDialog()
+        //this.dialog = PopUpWeatherInfoDialog()
         if(savedInstanceState != null){
             with(savedInstanceState){
                 Log.e(TAG, "onCreate dialog state1: ${getBoolean("showDialog")}")
@@ -49,7 +49,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 cityInfo = getParcelable("cityDialog")?: CityWheatherInfo()
             }
         }else{
-            this.searchViewModel.setUp(applicationContext)
+            this.searchViewModel.setUp()
         }
         this.binding = ActivitySearchPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -133,10 +133,12 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         }else{
             searchViewModel.getWeatherAsync(query).invokeOnCompletion {
                 cityInfo = this.searchViewModel.cityWheatherInfo
-                dialog.show(this.supportFragmentManager,"MyDialog")
+                val dialog = PopUpWeatherInfoDialog()
+                dialog.show(supportFragmentManager,"MyDialog")
                 Log.e(TAG, "onQueryTextSubmit: ${this.searchViewModel.citiesWheatherList.value}", )
             }
         }
+        this.binding.searchBar.setQuery("",false) // Resets the text inside the search bar
         return false
     }
 
@@ -225,7 +227,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         var cirtiria = Criteria()
         var provider = locationManager.getBestProvider(cirtiria,false)
         Log.e(TAG, "onRequestPermissionsResult: ${provider.toString()}", )
-        Log.e(TAG, "onRequestPermissionsResult 3: ${grantResults.get(0)}", )
         var location =
             provider?.let {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
