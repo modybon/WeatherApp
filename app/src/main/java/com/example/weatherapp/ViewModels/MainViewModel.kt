@@ -10,7 +10,7 @@ created by
  * on ${2020/3/3} */
 
 class MainViewModel: ViewModel() {
-    var citiesList : ArrayList<CityWheatherInfo> = ArrayList<CityWheatherInfo>()
+    var citiesList : ArrayList<CityWheatherInfo> = ArrayList()
     var selectedCity : CityWheatherInfo = CityWheatherInfo()
     fun selectedCityInfo(position: Int){
         selectedCity = citiesList[position]

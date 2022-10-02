@@ -4,13 +4,16 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.Models.CityWheatherInfo
 import com.example.weatherapp.Models.WeatherType
 import com.example.weatherapp.managers.SharedPrefrencesManager
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -47,8 +50,7 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
 
     fun loadWeather(city: String) {
         val ins: InputStream?
-        val u =
-            "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=${this.key}&units=$metrics"
+        val u = "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=${this.key}&units=$metrics"
         var result: String
         try {
             val url = URL(u)
@@ -58,11 +60,16 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
             ins = connection.inputStream
             result = ins.bufferedReader().use(BufferedReader::readText)
             Log.e(TAG, "Result loadWeather: ${result}")
+        } catch (exec: Exception) {
+            result = ""
+            Log.e(TAG, "loadWeather: Couldn't fetch ${city} Info", )
+            this.cityWheatherInfo.cityName = city
+        }
+        if(!result.isEmpty()){
             val json = JSONObject(result)
             val jsonarr = json.toJSONArray(json.names())
             Log.e(TAG, "jsonarray: ${jsonarr}")
             var obj = jsonarr.getJSONArray(1).get(0) as JSONObject
-
             var infodesc = jsonarr[1] as JSONArray
             Log.e(TAG, "Info Desc: ${(infodesc[0] as JSONObject).get("description")}")
             var tempInfo = jsonarr[3] as JSONObject // temp, feels Like , temp_min, temp_max, pressure, humidity
@@ -71,24 +78,20 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
             Log.e(TAG, "Temp Info 2: ${tempInfo2}")
             var tempInfo3 = jsonarr[5] as JSONObject // Wind Speed , Wind Degree
             Log.e(TAG, "Temp Info 3: ${tempInfo3}")
-            var tempInfo4 = jsonarr[11] // City
+            var tempInfo4 : String // City
+            if(jsonarr[11].toString().toDoubleOrNull() != null){
+                tempInfo4 = jsonarr[12].toString()
+            }else{
+                tempInfo4 = jsonarr[11].toString()
+            }
             Log.e(TAG, "Temp Info 4: ${tempInfo4}")
-            var tempInfo5 = jsonarr[8] as JSONObject  // Country , Sun Rise , Sun Set
-            Log.e(TAG, "Temp Info 5: ${tempInfo5.get("country")}")
-            //Log.e(TAG, "TempInfo 5: $tempInfo5")
-
-//   var feelsLike = tempInfo.getString("feels_like").toFloat()
-//   var temp = tempInfo.getString("temp").toFloat()
-//   var highTemp = tempInfo.getString("temp_max").toFloat()
-//   var lowTemp = tempInfo.getString("temp_min").toFloat()
-//   var pressure = tempInfo.getString("pressure").toInt()
-//   var humidity = tempInfo.getString("humidity").toInt()
-//   var visibility = tempInfo2.toString().toInt();
-//   var windSpeed = tempInfo3.getString("speed").toFloat()
-//   var windDegree = tempInfo3.getString("deg").toFloat()
-//   var cityName = tempInfo4.toString()
-//   var country = tempInfo5.get("country").toString()
-
+            var tempInfo5 : JSONObject? = null
+            try {
+                tempInfo5 = jsonarr[8] as JSONObject  // Country , Sun Rise , Sun Set
+                Log.e(TAG, "Temp Info 5: ${tempInfo5.get("country")}")
+            }catch (ex: Exception){
+                Log.e(TAG, "loadWeather: Couldn't fetch Country", )
+            }
             when ((infodesc[0] as JSONObject).get("icon").toString()) {
                 "01n" ->{
                     this.cityWheatherInfo.backgroundColor = WeatherType.clearSkyNight.backgroundColor
@@ -173,22 +176,15 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
             this.cityWheatherInfo.visibility = tempInfo2.toString().toInt();
             this.cityWheatherInfo.windSpeed = tempInfo3.getString("speed").toFloat()
             this.cityWheatherInfo.windDegree = tempInfo3.getString("deg").toFloat()
-            this.cityWheatherInfo.countryName = tempInfo5.get("country").toString()
+            if (tempInfo5 != null) {
+                this.cityWheatherInfo.countryName = tempInfo5.get("country").toString()
+            }
             this.cityWheatherInfo.desc = (infodesc[0] as JSONObject).get("description").toString()
-//            Log.e(TAG, "TEST RUN: ${cityWheatherInfo.toString()}")
-//            Log.e(
-//                TAG,
-//                "TEST RUN ------------------------------------------------------------------------------"
-//            )
-//            Log.e(TAG, "Obj: ${obj}")
-
-        } catch (exec: Exception) {
-            Log.e(TAG, "Error loadWeather: ${exec.message}")
-            this.cityWheatherInfo.cityName = city
         }
+
     }
 
-    fun getWeatherAsync(city: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun getWeatherAsync(city: String) = viewModelScope.launch(Dispatchers.Default) {
         loadWeather(city)
     }
 
@@ -199,11 +195,10 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
 
     fun setUp() = viewModelScope.launch(Dispatchers.IO) {
         Log.e(TAG, "setUp1: ${getSavedCities()}")
-        val threadName = Thread.currentThread().name
-
         getSavedCities().forEach { city ->
+                val threadName = Thread.currentThread().name
                 Log.e(TAG, "TEST RUN onCreate: City Name: $city")
-                Log.e(TAG, "setUp: $threadName")
+                Log.e(TAG, "Thread Name: $threadName")
                 loadWeather(city)
                 addCity()
             }
@@ -277,37 +272,15 @@ class SearchViewModel (application: Application) : AndroidViewModel(application)
 }
 
 
-//if((citiesWheatherList.value.isNullOrEmpty())){
-//    Log.e(TAG, "currentCityChanged cityWheatherInfo: ${cityWheatherInfo.cityName}", )
-//    cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-//    Log.e(TAG, "currentCityChanged: $currentCity", )
-//    //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-//    cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-//    //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-//    //currentCity = SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)
-//    addCity()
-//}else{
-//    //Log.e(TAG, "onLocationChanged Cities Before Removal: ${citiesWheatherList.value}")
-//    if(citiesWheatherList.value?.get(0)?.cityName!! == getCurrentCity()){
-//        SharedPrefrencesManager.removeCity(CITIES_LIST_KEY,citiesWheatherList.value?.get(0)?.cityName!!)
-//        //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
-//        //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
-//        Log.e(TAG, "currentCityChanged: $currentCity", )
-//        cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-//        cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-//        //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-//        citiesWheatherList.value?.removeFirst()
-//        addCity()
-//    }else{
-//        //Log.e(TAG, "onLocationChanged Cities After Removal: ${citiesWheatherList.value}")
-//        //Log.e(TAG, "onLocationChanged Current City before change: ${SharedPrefrencesManager.readCurrentCity(CURRENT_CITY_KEY)}")
-//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-//        Log.e(TAG, "currentCityChanged: $currentCity", )
-//        cityWheatherInfo.cityName?.let { writeCurrentCity(it) }
-//        //SharedPrefrencesManager.writeCurrentCity("currentCity",city)
-//        cityWheatherInfo.cityName?.let { writeCitiesList(it) }
-//        //SharedPrefrencesManager.writeCitiesList(CITIES_LIST_KEY,city)
-//        addCity()
-//    }
-//}
+
+//   var feelsLike = tempInfo.getString("feels_like").toFloat()
+//   var temp = tempInfo.getString("temp").toFloat()
+//   var highTemp = tempInfo.getString("temp_max").toFloat()
+//   var lowTemp = tempInfo.getString("temp_min").toFloat()
+//   var pressure = tempInfo.getString("pressure").toInt()
+//   var humidity = tempInfo.getString("humidity").toInt()
+//   var visibility = tempInfo2.toString().toInt();
+//   var windSpeed = tempInfo3.getString("speed").toFloat()
+//   var windDegree = tempInfo3.getString("deg").toFloat()
+//   var cityName = tempInfo4.toString()
+//   var country = tempInfo5.get("country").toString()

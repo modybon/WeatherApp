@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.Models.*
 import com.example.weatherapp.databinding.ActivitySearchPageBinding
+import kotlinx.coroutines.*
 import java.util.*
 
 class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, WeatherInfoDialogInterface, LocationListener{
@@ -60,8 +61,6 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         this.binding.recyclerView.adapter = recyclerViewAdapter
         this.searchViewModel.citiesWheatherList.observe(this){
             recyclerViewAdapter.notifyDataSetChanged()
-            Log.e(TAG, "SIZE onCreate: ${this.searchViewModel.citiesWheatherList.value?.size}")
-            Log.e(TAG, "VALUE onCreate: ${this.searchViewModel.citiesWheatherList.value}")
         }
         this.binding.recyclerView.addItemDecoration(MarginItemDecoration(40))
         getLocation()
@@ -142,9 +141,10 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
         return false
     }
 
-    override fun onClickListener(cityWheatherInfo: CityWheatherInfo,position: Int) {
+    override fun onClickListener(cityWheatherInfo: CityWheatherInfo, position: Int) {
         val intent = Intent(this, MainActivity::class.java)
         intent.putParcelableArrayListExtra("CitiesList",this.searchViewModel.citiesWheatherList.value)
+        Log.e(TAG, "onClickListener position: $position")
         intent.putExtra("ItemSelectedPosition",position)
         // TODO: HAVE THE GET POSITON BE SEPERATE FROM THE ONCLICKLISTENER
         startActivity(intent)
@@ -251,7 +251,7 @@ class SearchPage() : AppCompatActivity(), SearchView.OnQueryTextListener, Weathe
                 }
                 return@onRequestPermissionsResult
             }
-            Toast.makeText(this.baseContext,"Couldn't Fetch Current Location",Toast.LENGTH_LONG).show()
+            Toast.makeText(this,"Couldn't Fetch Current Location",Toast.LENGTH_LONG).show()
         }
     }
 

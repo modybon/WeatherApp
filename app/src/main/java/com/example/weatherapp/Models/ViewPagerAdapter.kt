@@ -1,5 +1,6 @@
 package com.example.weatherapp.Models
 
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -19,6 +20,7 @@ class ViewPagerAdapter(activity: AppCompatActivity, var viewModel: MainViewModel
     }
 
     override fun createFragment(position: Int): Fragment {
+        Log.e(TAG, "createFragment position: $position", )
         viewModel.selectedCityInfo(position)
         return WeatherPage()
     }

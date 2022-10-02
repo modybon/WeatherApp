@@ -25,15 +25,17 @@ class MainActivity : AppCompatActivity(){
         this.binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //intentExtras.getParcelableArrayList<Parcelable>("CitiesList").toString()
-        var itemPosition = intentExtras.getInt("ItemSelectedPosition")
-
         if(savedInstanceState != null){
-            data = savedInstanceState.getParcelableArrayList<CityWheatherInfo>("citiesWeatherInfo")?: arrayListOf()
+            data = savedInstanceState.getParcelableArrayList("citiesWeatherInfo")?: arrayListOf()
             Log.e(TAG, "onCreate onSaved: $data")
         }else{
             data = intentExtras.get("CitiesList") as ArrayList<CityWheatherInfo>
         }
+        var itemPosition = intentExtras.getInt("ItemSelectedPosition")
+        Log.e(TAG, "onCreate data: $data", )
+        Log.e(TAG, "onCreate position: $itemPosition", )
         viewModel.citiesList = data
+        Log.e(TAG, "onCreate data2: ${viewModel.citiesList}", )
         this.binding.searchPageBtn.setOnClickListener{
             // SingleTask as launch mode will retreive the previous instance
             // of this activity since it is the root and will destroy all above activities
